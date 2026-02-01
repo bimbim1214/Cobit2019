@@ -109,6 +109,9 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="min-h-screen py-8 bg-gray-100">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
@@ -120,15 +123,16 @@
 
             <!-- Progress Bar -->
             @php
+                // Progress based on DF1-DF4 only (Summary doesn't include DF5)
                 $completedCount = 0;
-                foreach (['DF1', 'DF2', 'DF3', 'DF4', 'DF5'] as $df) {
+                foreach (['DF1', 'DF2', 'DF3', 'DF4'] as $df) {
                     if (isset($progress[$df]) && $progress[$df]['completed']) {
                         $completedCount++;
                     }
                 }
-                // If all DFs are completed and we're on summary, show 100%
+                // If Summary is locked, show 100%
                 $allLocked = isset($progress['Summary']) && $progress['Summary']['locked'];
-                $progressPercent = $allLocked ? 100 : (($completedCount / 6) * 100);
+                $progressPercent = $allLocked ? 100 : (($completedCount / 4) * 100);
             @endphp
             <div class="mb-6 bg-white rounded-xl shadow-sm p-4">
                 <div class="flex justify-between items-center mb-2">
@@ -159,7 +163,8 @@
                     @endphp
                     <a href="{{ $isAccessible ? route('design-factors.index', $tabType) : '#' }}"
                         class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
-                                                {{ $isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}" {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
+                                                                        {{ $isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}"
+                        {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
                         {{ $tabLabel }}
                         @if($isCompleted)
                             <span class="text-lg">✅</span>
@@ -218,7 +223,6 @@
                                 <th style="min-width: 120px;">Enterprise<br>Goals</th>
                                 <th style="min-width: 120px;">Risk Profile</th>
                                 <th style="min-width: 120px;">IT-Related Issues</th>
-                                <th style="min-width: 120px;">Gov/Mgmt Objectives</th>
                                 <th style="min-width: 150px;">Initial Scope:<br>Governance/<br>Management<br>Objectives
                                     Score</th>
                             </tr>
@@ -228,56 +232,49 @@
                                 <tr>
                                     <td>
                                         <span class="px-3 py-1 text-sm font-black rounded
-                                                                        @if(str_starts_with($row['code'], 'EDM')) badge-edm
-                                                                        @elseif(str_starts_with($row['code'], 'APO')) badge-apo
-                                                                        @elseif(str_starts_with($row['code'], 'BAI')) badge-bai
-                                                                        @elseif(str_starts_with($row['code'], 'DSS')) badge-dss
-                                                                        @elseif(str_starts_with($row['code'], 'MEA')) badge-mea
-                                                                        @endif">
+                                                                                                @if(str_starts_with($row['code'], 'EDM')) badge-edm
+                                                                                                @elseif(str_starts_with($row['code'], 'APO')) badge-apo
+                                                                                                @elseif(str_starts_with($row['code'], 'BAI')) badge-bai
+                                                                                                @elseif(str_starts_with($row['code'], 'DSS')) badge-dss
+                                                                                                @elseif(str_starts_with($row['code'], 'MEA')) badge-mea
+                                                                                                @endif">
                                             {{ $row['code'] }}
                                         </span>
                                         <span class="ml-2">{{ $row['name'] }}</span>
                                     </td>
                                     <td class="
-                                                                    @if($row['df1'] > 0) value-positive
-                                                                    @elseif($row['df1'] < 0) value-negative
-                                                                    @else value-neutral
-                                                                    @endif">
+                                                                                            @if($row['df1'] > 0) value-positive
+                                                                                            @elseif($row['df1'] < 0) value-negative
+                                                                                            @else value-neutral
+                                                                                            @endif">
                                         {{ $row['df1'] > 0 ? '+' : '' }}{{ (int) $row['df1'] }}
                                     </td>
                                     <td class="
-                                                                    @if($row['df2'] > 0) value-positive
-                                                                    @elseif($row['df2'] < 0) value-negative
-                                                                    @else value-neutral
-                                                                    @endif">
+                                                                                            @if($row['df2'] > 0) value-positive
+                                                                                            @elseif($row['df2'] < 0) value-negative
+                                                                                            @else value-neutral
+                                                                                            @endif">
                                         {{ $row['df2'] > 0 ? '+' : '' }}{{ (int) $row['df2'] }}
                                     </td>
                                     <td class="
-                                                                    @if($row['df3'] > 0) value-positive
-                                                                    @elseif($row['df3'] < 0) value-negative
-                                                                    @else value-neutral
-                                                                    @endif">
+                                                                                            @if($row['df3'] > 0) value-positive
+                                                                                            @elseif($row['df3'] < 0) value-negative
+                                                                                            @else value-neutral
+                                                                                            @endif">
                                         {{ $row['df3'] > 0 ? '+' : '' }}{{ (int) $row['df3'] }}
                                     </td>
                                     <td class="
-                                                                    @if($row['df4'] > 0) value-positive
-                                                                    @elseif($row['df4'] < 0) value-negative
-                                                                    @else value-neutral
-                                                                    @endif">
+                                                                                            @if($row['df4'] > 0) value-positive
+                                                                                            @elseif($row['df4'] < 0) value-negative
+                                                                                            @else value-neutral
+                                                                                            @endif">
                                         {{ $row['df4'] > 0 ? '+' : '' }}{{ (int) $row['df4'] }}
                                     </td>
                                     <td class="
-                                                                    @if($row['df5'] > 0) value-positive
-                                                                    @elseif($row['df5'] < 0) value-negative
-                                                                    @else value-neutral
-                                                                    @endif">
-                                        {{ $row['df5'] > 0 ? '+' : '' }}{{ (int) $row['df5'] }}
-                                    </td>
-                                    <td class="
-                                                                    @if($row['initial_scope'] > 0) initial-scope-positive
-                                                                    @elseif($row['initial_scope'] < 0) initial-scope-negative
-                                                                    @else initial-scope-neutral
-                                                                    @endif">
+                                                                                            @if($row['initial_scope'] > 0) initial-scope-positive
+                                                                                            @elseif($row['initial_scope'] < 0) initial-scope-negative
+                                                                                            @else initial-scope-neutral
+                                                                                            @endif">
                                         {{ $row['initial_scope'] > 0 ? '+' : '' }}{{ (int) $row['initial_scope'] }}
                                     </td>
                                 </tr>
@@ -374,10 +371,9 @@
                             melanjutkan.
                         </p>
                     </div>
-                    <form action="{{ route('design-factors.lock-summary') }}" method="POST"
-                        onsubmit="return confirm('Apakah Anda yakin ingin menyimpan Summary? Semua Design Factors akan terkunci dan tidak dapat diubah lagi.')">
+                    <form id="lockSummaryForm" action="{{ route('design-factors.lock-summary') }}" method="POST">
                         @csrf
-                        <button type="submit"
+                        <button type="button" onclick="confirmLockSummary()"
                             class="flex items-center px-8 py-3 text-base font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transform hover:scale-105 transition-all shadow-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -387,6 +383,53 @@
                             Simpan Summary & Kunci DF1-DF4
                         </button>
                     </form>
+
+                    <script>
+                        function confirmLockSummary() {
+                            Swal.fire({
+                                title: '🔒 Konfirmasi Penguncian',
+                                icon: 'warning',
+                                html: `
+                                        <div style="text-align: left; margin-top: 10px;">
+                                            <p style="color: #4b5563; font-size: 15px; margin-bottom: 15px;">
+                                                Apakah Anda yakin ingin menyimpan Summary dan mengunci <strong>DF1-DF4</strong>?
+                                            </p>
+                                            <div style="background: #fffbe6; border: 1px solid #ffe58f; padding: 12px; border-radius: 8px;">
+                                                <p style="margin: 0; font-weight: 700; color: #856404; font-size: 14px;">⚠️ Perhatian:</p>
+                                                <ul style="margin: 8px 0 0 15px; padding: 0; color: #856404; font-size: 13px; line-height: 1.5;">
+                                                    <li>Data <strong>DF1-DF4</strong> akan terkunci permanen</li>
+                                                    <li>Anda tidak dapat mengubah data ini lagi</li>
+                                                    <li><strong>DF5</strong> akan tetap dapat diakses</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    `,
+                                showCancelButton: true,
+                                confirmButtonColor: '#16a34a',
+                                cancelButtonColor: '#6b7280',
+                                confirmButtonText: '✓ Ya, Simpan & Kunci',
+                                cancelButtonText: '✕ Batal',
+                                reverseButtons: true,
+                                width: '480px',
+                                customClass: {
+                                    popup: 'rounded-xl shadow-xl'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Show loading indicator
+                                    Swal.fire({
+                                        title: 'Menyimpan...',
+                                        text: 'Sedang memproses penguncian data',
+                                        allowOutsideClick: false,
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                        }
+                                    });
+                                    document.getElementById('lockSummaryForm').submit();
+                                }
+                            });
+                        }
+                    </script>
                 </div>
             @else
                 <!-- Warning: Not all DFs completed -->
@@ -412,15 +455,32 @@
                         Setelah melihat Summary, Anda dapat melanjutkan ke <strong>DF5: Governance and Management
                             Objectives</strong> untuk analisis tambahan.
                     </p>
-                    <a href="{{ route('design-factors.index', 'DF5') }}"
-                        class="inline-flex items-center px-8 py-3 text-base font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transform hover:scale-105 transition-all shadow-lg">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7l5 5m0 0l-5 5m5-5H6">
-                            </path>
-                        </svg>
-                        Lanjut ke DF5
-                    </a>
+                    @if(!$isLocked)
+                        {{-- Button disabled when NOT locked --}}
+                        <button disabled
+                            class="inline-flex items-center px-8 py-3 text-base font-bold text-gray-500 bg-gray-300 rounded-xl cursor-not-allowed opacity-60">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                </path>
+                            </svg>
+                            Kunci Summary Terlebih Dahulu
+                        </button>
+                        <p class="text-gray-600 text-sm mt-2">
+                            Anda harus mengunci Summary (DF1-DF4) terlebih dahulu sebelum dapat melanjutkan ke DF5.
+                        </p>
+                    @else
+                        {{-- Button enabled when locked --}}
+                        <a href="{{ route('design-factors.index', 'DF5') }}"
+                            class="inline-flex items-center px-8 py-3 text-base font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transform hover:scale-105 transition-all shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6">
+                                </path>
+                            </svg>
+                            Lanjut ke DF5
+                        </a>
+                    @endif
                 </div>
             @endif
 

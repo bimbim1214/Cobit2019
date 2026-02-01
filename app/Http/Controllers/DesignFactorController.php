@@ -304,18 +304,9 @@ class DesignFactorController extends Controller
             $item->relative_importance = $df4->calculateRelativeImportance($item->score, $item->baseline_score);
         }
 
-        // Get DF5 Results
-        $df5 = \App\Models\DesignFactor5::where('user_id', $user->id)->first();
-        $df5Results = [];
-        if ($df5) {
-            $df5Results = $df5->calculateRelativeImportance();
-        } else {
-            // Default 50/50
-            $tempDf5 = new \App\Models\DesignFactor5(['importance_high' => 50, 'importance_normal' => 50]);
-            $df5Results = $tempDf5->calculateRelativeImportance();
-        }
+        // Summary only includes DF1-DF4 (DF5 is separate)
 
-        // Create aggregated data structure
+        // Create aggregated data structure (DF1-DF4 only)
         $summaryData = [];
 
         // Get all unique objective codes (should be 40)
@@ -331,19 +322,17 @@ class DesignFactorController extends Controller
             $df2Value = $df2Item ? $df2Item->relative_importance : 0;
             $df3Value = $df3Item ? $df3Item->relative_importance : 0;
             $df4Value = $df4Item ? $df4Item->relative_importance : 0;
-            $df5Value = $df5Results[$code] ?? 0;
-
-            // Calculate Initial Scope: Governance using the provided formula
-            // Weights are all 1, max values are 140 and 70
-            $weights = [1, 1, 1, 1, 1];
-            $values = [$df1Value, $df2Value, $df3Value, $df4Value, $df5Value];
+            // Calculate Initial Scope using only DF1-DF4 (no DF5)
+            // Weights are all 1 for each DF
+            $weights = [1, 1, 1, 1];
+            $values = [$df1Value, $df2Value, $df3Value, $df4Value];
 
             $sumProduct = 0;
-            for ($i = 0; $i < 5; $i++) {
+            for ($i = 0; $i < 4; $i++) {
                 $sumProduct += $weights[$i] * $values[$i];
             }
 
-            $maxValue = max(140, 70); // = 140
+            $maxValue = 140; // Max value for DF1-DF4 calculation
             $calculated = 100 * $sumProduct / $maxValue;
             $truncated = floor($calculated);
 
@@ -360,7 +349,7 @@ class DesignFactorController extends Controller
                 'df2' => $df2Value,
                 'df3' => $df3Value,
                 'df4' => $df4Value,
-                'df5' => $df5Value,
+                // DF5 removed - Summary only shows DF1-DF4
                 'initial_scope' => $initialScope,
             ];
         }
