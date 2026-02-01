@@ -232,12 +232,26 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     // Design Factor (DF1, DF2, etc.)
     Route::get('/design-factors/{type?}', [\App\Http\Controllers\DesignFactorController::class, 'index'])
         ->name('design-factors.index');
+    Route::get('/design-factors-summary', [\App\Http\Controllers\DesignFactorController::class, 'summary'])
+        ->name('design-factors.summary');
     Route::post('/design-factors', [\App\Http\Controllers\DesignFactorController::class, 'store'])
         ->name('design-factors.store');
+    Route::post('/design-factors/lock-summary', [\App\Http\Controllers\DesignFactorController::class, 'lockSummary'])
+        ->name('design-factors.lock-summary');
     Route::post('/design-factors/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculate'])
         ->name('design-factors.calculate');
+    Route::post('/design-factors/reset-all', [\App\Http\Controllers\DesignFactorController::class, 'resetAll'])
+        ->name('design-factors.reset-all');
     Route::delete('/design-factors/item/{item}', [\App\Http\Controllers\DesignFactorController::class, 'deleteItem'])
         ->name('design-factors.delete-item');
+
+    // DF5 Routes
+    Route::get('/design-factors-df5', [\App\Http\Controllers\DesignFactorController::class, 'showDf5'])
+        ->name('design-factors.df5');
+    Route::post('/design-factors-df5/save', [\App\Http\Controllers\DesignFactorController::class, 'saveDf5'])
+        ->name('design-factors.df5.save');
+    Route::post('/design-factors-df5/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculateDf5'])
+        ->name('design-factors.df5.calculate');
 });
 
 

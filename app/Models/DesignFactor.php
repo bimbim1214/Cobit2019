@@ -15,11 +15,15 @@ class DesignFactor extends Model
         'factor_name',
         'inputs', // JSON
         'extra_data', // JSON
+        'is_completed',
+        'is_locked',
     ];
 
     protected $casts = [
         'inputs' => 'array',
         'extra_data' => 'array',
+        'is_completed' => 'boolean',
+        'is_locked' => 'boolean',
     ];
 
     /**
@@ -183,6 +187,12 @@ class DesignFactor extends Model
         if (empty($inputs))
             return 3.0;
 
+        // For DF2, baseline is always 3 (fixed in input section)
+        // F20 = AVERAGE(E6:E18) where all E values are 3
+        if ($this->factor_type === 'DF2') {
+            return 3.0;
+        }
+
         $values = array_column($inputs, 'baseline');
         return count($values) > 0 ? array_sum($values) / count($values) : 3.0;
     }
@@ -203,8 +213,16 @@ class DesignFactor extends Model
             return $avgBase / $avgImp;
         }
 
-        // DF2, DF3: Importance / Baseline
-        if ($this->factor_type === 'DF2' || $this->factor_type === 'DF3') {
+        // DF2: Baseline / Importance
+        // Formula: F22 = AVERAGE(F6:F18) / F20
+        // where F6:F18 are baseline values (all 3) and F20 = AVERAGE(E6:E18) = average importance
+        // F22 = 3 / AVERAGE(importance) = Baseline / Importance
+        if ($this->factor_type === 'DF2') {
+            return $avgBase / $avgImp;
+        }
+
+        // DF3: Importance / Baseline
+        if ($this->factor_type === 'DF3') {
             return $avgImp / $avgBase;
         }
 
@@ -368,49 +386,184 @@ class DesignFactor extends Model
 
         if ($type === 'DF4') {
             return [
-                ['code' => 'EDM01', 'score' => 170, 'baseline_score' => 140],
-                ['code' => 'EDM02', 'score' => 210, 'baseline_score' => 170],
-                ['code' => 'EDM03', 'score' => 240, 'baseline_score' => 200],
-                ['code' => 'EDM04', 'score' => 160, 'baseline_score' => 130],
-                ['code' => 'EDM05', 'score' => 140, 'baseline_score' => 110],
-                ['code' => 'APO01', 'score' => 190, 'baseline_score' => 160],
-                ['code' => 'APO02', 'score' => 200, 'baseline_score' => 170],
-                ['code' => 'APO03', 'score' => 180, 'baseline_score' => 150],
-                ['code' => 'APO04', 'score' => 160, 'baseline_score' => 130],
-                ['code' => 'APO05', 'score' => 170, 'baseline_score' => 140],
-                ['code' => 'APO06', 'score' => 180, 'baseline_score' => 150],
-                ['code' => 'APO07', 'score' => 220, 'baseline_score' => 180],
-                ['code' => 'APO08', 'score' => 200, 'baseline_score' => 160],
-                ['code' => 'APO09', 'score' => 190, 'baseline_score' => 150],
-                ['code' => 'APO10', 'score' => 210, 'baseline_score' => 170],
-                ['code' => 'APO11', 'score' => 230, 'baseline_score' => 190],
-                ['code' => 'APO12', 'score' => 250, 'baseline_score' => 210],
-                ['code' => 'APO13', 'score' => 240, 'baseline_score' => 200],
-                ['code' => 'APO14', 'score' => 160, 'baseline_score' => 130],
-                ['code' => 'BAI01', 'score' => 230, 'baseline_score' => 190],
-                ['code' => 'BAI02', 'score' => 210, 'baseline_score' => 180],
-                ['code' => 'BAI03', 'score' => 220, 'baseline_score' => 180],
-                ['code' => 'BAI04', 'score' => 190, 'baseline_score' => 160],
-                ['code' => 'BAI05', 'score' => 200, 'baseline_score' => 170],
-                ['code' => 'BAI06', 'score' => 180, 'baseline_score' => 150],
-                ['code' => 'BAI07', 'score' => 190, 'baseline_score' => 160],
-                ['code' => 'BAI08', 'score' => 210, 'baseline_score' => 170],
-                ['code' => 'BAI09', 'score' => 180, 'baseline_score' => 150],
-                ['code' => 'BAI10', 'score' => 170, 'baseline_score' => 140],
-                ['code' => 'BAI11', 'score' => 190, 'baseline_score' => 160],
-                ['code' => 'DSS01', 'score' => 230, 'baseline_score' => 190],
-                ['code' => 'DSS02', 'score' => 240, 'baseline_score' => 200],
-                ['code' => 'DSS03', 'score' => 250, 'baseline_score' => 210],
-                ['code' => 'DSS04', 'score' => 260, 'baseline_score' => 220],
-                ['code' => 'DSS05', 'score' => 270, 'baseline_score' => 230],
-                ['code' => 'DSS06', 'score' => 240, 'baseline_score' => 190],
-                ['code' => 'MEA01', 'score' => 210, 'baseline_score' => 180],
-                ['code' => 'MEA02', 'score' => 220, 'baseline_score' => 180],
-                ['code' => 'MEA03', 'score' => 230, 'baseline_score' => 190],
-                ['code' => 'MEA04', 'score' => 200, 'baseline_score' => 170],
+                ['code' => 'EDM01', 'score' => 59.5, 'baseline_score' => 70],
+                ['code' => 'EDM02', 'score' => 61, 'baseline_score' => 70],
+                ['code' => 'EDM03', 'score' => 39, 'baseline_score' => 47],
+                ['code' => 'EDM04', 'score' => 65.5, 'baseline_score' => 67],
+                ['code' => 'EDM05', 'score' => 33, 'baseline_score' => 41],
+                ['code' => 'APO01', 'score' => 50, 'baseline_score' => 56],
+                ['code' => 'APO02', 'score' => 48, 'baseline_score' => 50],
+                ['code' => 'APO03', 'score' => 64.5, 'baseline_score' => 66],
+                ['code' => 'APO04', 'score' => 35.5, 'baseline_score' => 32],
+                ['code' => 'APO05', 'score' => 61, 'baseline_score' => 68],
+                ['code' => 'APO06', 'score' => 52, 'baseline_score' => 62],
+                ['code' => 'APO07', 'score' => 49, 'baseline_score' => 47],
+                ['code' => 'APO08', 'score' => 67.5, 'baseline_score' => 70],
+                ['code' => 'APO09', 'score' => 36.5, 'baseline_score' => 43],
+                ['code' => 'APO10', 'score' => 33, 'baseline_score' => 39],
+                ['code' => 'APO11', 'score' => 34, 'baseline_score' => 43],
+                ['code' => 'APO12', 'score' => 44.5, 'baseline_score' => 52],
+                ['code' => 'APO13', 'score' => 26.5, 'baseline_score' => 33],
+                ['code' => 'APO14', 'score' => 48.5, 'baseline_score' => 60],
+                ['code' => 'BAI01', 'score' => 37.5, 'baseline_score' => 35],
+                ['code' => 'BAI02', 'score' => 47, 'baseline_score' => 51],
+                ['code' => 'BAI03', 'score' => 35, 'baseline_score' => 41],
+                ['code' => 'BAI04', 'score' => 18.5, 'baseline_score' => 23],
+                ['code' => 'BAI05', 'score' => 27.5, 'baseline_score' => 28],
+                ['code' => 'BAI06', 'score' => 38, 'baseline_score' => 42],
+                ['code' => 'BAI07', 'score' => 34, 'baseline_score' => 38],
+                ['code' => 'BAI08', 'score' => 34.5, 'baseline_score' => 31],
+                ['code' => 'BAI09', 'score' => 22, 'baseline_score' => 23],
+                ['code' => 'BAI10', 'score' => 23, 'baseline_score' => 25],
+                ['code' => 'BAI11', 'score' => 46.5, 'baseline_score' => 45],
+                ['code' => 'DSS01', 'score' => 21, 'baseline_score' => 27],
+                ['code' => 'DSS02', 'score' => 24.5, 'baseline_score' => 33],
+                ['code' => 'DSS03', 'score' => 28, 'baseline_score' => 32],
+                ['code' => 'DSS04', 'score' => 16.5, 'baseline_score' => 21],
+                ['code' => 'DSS05', 'score' => 22.5, 'baseline_score' => 29],
+                ['code' => 'DSS06', 'score' => 20, 'baseline_score' => 29],
+                ['code' => 'MEA01', 'score' => 52.5, 'baseline_score' => 61],
+                ['code' => 'MEA02', 'score' => 38, 'baseline_score' => 48],
+                ['code' => 'MEA03', 'score' => 18.5, 'baseline_score' => 29],
+                ['code' => 'MEA04', 'score' => 47, 'baseline_score' => 58],
             ];
         }
 
         return [];
     }
+
+    /**
+     * Check if all inputs are filled (no empty values)
+     */
+    public function isFullyFilled(): bool
+    {
+        $inputs = $this->inputs ?? [];
+        if (empty($inputs)) {
+            return false;
+        }
+
+        foreach ($inputs as $input) {
+            if ($this->factor_type === 'DF3') {
+                // For DF3, check impact and likelihood
+                if (!isset($input['impact']) || !isset($input['likelihood'])) {
+                    return false;
+                }
+            } else {
+                // For DF1, DF2, DF4, check importance
+                if (!isset($input['importance'])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if user can access a specific DF type
+     */
+    public static function canAccess(int $userId, string $type): bool
+    {
+        // DF1 is always accessible
+        if ($type === 'DF1') {
+            return true;
+        }
+
+        // Get the previous DF type - NEW ORDER: DF1, DF2, DF3, DF4, Summary, DF5
+        $dfOrder = ['DF1', 'DF2', 'DF3', 'DF4', 'Summary', 'DF5'];
+        $currentIndex = array_search($type, $dfOrder);
+
+        if ($currentIndex === false || $currentIndex === 0) {
+            return true;
+        }
+
+        $previousType = $dfOrder[$currentIndex - 1];
+
+        // Summary requires only DF1-DF4 to be completed (not DF5)
+        if ($type === 'Summary') {
+            $allCompleted = true;
+            foreach (['DF1', 'DF2', 'DF3', 'DF4'] as $dfType) {
+                $df = self::where('user_id', $userId)
+                    ->where('factor_type', $dfType)
+                    ->first();
+
+                if (!$df || !$df->is_completed) {
+                    $allCompleted = false;
+                    break;
+                }
+            }
+            return $allCompleted;
+        }
+
+        // DF5 requires Summary to be accessible (which means DF1-DF4 completed)
+        if ($type === 'DF5') {
+            // Check if Summary is accessible (DF1-DF4 completed)
+            return self::canAccess($userId, 'Summary');
+        }
+
+        if ($previousType === 'DF5') {
+            $previousDF = \App\Models\DesignFactor5::where('user_id', $userId)->first();
+            return $previousDF !== null;
+        }
+
+        // Check if previous DF is completed
+        $previousDF = self::where('user_id', $userId)
+            ->where('factor_type', $previousType)
+            ->first();
+
+        return $previousDF && $previousDF->is_completed;
+    }
+
+    /**
+     * Get progress information for a user
+     */
+    public static function getProgress(int $userId): array
+    {
+        $progress = [];
+        $types = ['DF1', 'DF2', 'DF3', 'DF4', 'DF5'];
+
+        foreach ($types as $type) {
+            if ($type === 'DF5') {
+                $df = \App\Models\DesignFactor5::where('user_id', $userId)->first();
+                $progress[$type] = [
+                    'exists' => $df !== null,
+                    'completed' => $df !== null,
+                    'locked' => false, // DF5 is never locked by Summary
+                    'accessible' => self::canAccess($userId, $type),
+                ];
+                continue;
+            }
+
+            $df = self::where('user_id', $userId)
+                ->where('factor_type', $type)
+                ->first();
+
+            $progress[$type] = [
+                'exists' => $df !== null,
+                'completed' => $df ? $df->is_completed : false,
+                'locked' => $df ? $df->is_locked : false,
+                'accessible' => self::canAccess($userId, $type),
+            ];
+        }
+
+        // Check if summary is accessible
+        // Summary is locked when DF1-DF4 are all locked (not including DF5)
+        $progress['Summary'] = [
+            'accessible' => self::canAccess($userId, 'Summary'),
+            'locked' => $progress['DF1']['locked'] && $progress['DF2']['locked'] &&
+                $progress['DF3']['locked'] && $progress['DF4']['locked'],
+        ];
+
+        return $progress;
+    }
+
+    /**
+     * Lock all design factors for a user
+     */
+    public static function lockAll(int $userId): void
+    {
+        self::where('user_id', $userId)
+            ->update(['is_locked' => true]);
+    }
 }
+

@@ -243,25 +243,76 @@
                 <p class="mt-2 text-gray-600">Tailoring Governance System based on Design Factors</p>
             </div>
 
+            <!-- Progress Bar -->
+            @php
+                $completedCount = 0;
+                foreach(['DF1', 'DF2', 'DF3', 'DF4', 'DF5'] as $df) {
+                    if(isset($progress[$df]) && $progress[$df]['completed']) {
+                        $completedCount++;
+                    }
+                }
+                $progressPercent = ($completedCount / 6) * 100; // 6 steps including Summary
+            @endphp
+            <div class="mb-6 bg-white rounded-xl shadow-sm p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold text-gray-700">Progress Keseluruhan</span>
+                    <span class="text-sm font-bold text-green-600">{{ number_format($progressPercent, 0) }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-green-600 h-3 rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
+                </div>
+            </div>
+
             <!-- Design Factor Tabs -->
             <div class="flex flex-wrap justify-center gap-2 mb-8">
-                <a href="{{ route('design-factors.index', 'DF1') }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF1' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
-                    DF1: Enterprise Strategy
-                </a>
-                <a href="{{ route('design-factors.index', 'DF2') }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF2' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
-                    DF2: Enterprise Goals
+                @php
+                    $tabs = [
+                        'DF1' => 'DF1: Enterprise Strategy',
+                        'DF2' => 'DF2: Enterprise Goals',
+                        'DF3' => 'DF3: Risk Profile',
+                        'DF4' => 'DF4: IT-Related Issues',
+                    ];
+                @endphp
+
+                @foreach($tabs as $tabType => $tabLabel)
+                    @php
+                        $isActive = $type === $tabType;
+                        $isAccessible = isset($progress[$tabType]) && $progress[$tabType]['accessible'];
+                        $isCompleted = isset($progress[$tabType]) && $progress[$tabType]['completed'];
+                    @endphp
+                    <a href="{{ $isAccessible ? route('design-factors.index', $tabType) : '#' }}"
+                        class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
+                            {{ $isActive ? 'bg-green-600 text-white shadow-lg' : ($isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
+                        {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
+                        {{ $tabLabel }}
+                        @if($isCompleted)
+                            <span class="text-lg">✅</span>
+                        @endif
+                    </a>
+                @endforeach
+
+                {{-- Summary Tab --}}
+                <a href="{{ isset($progress['Summary']) && $progress['Summary']['accessible'] ? route('design-factors.summary') : '#' }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all
+                        {{ isset($progress['Summary']) && $progress['Summary']['accessible'] ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}"
+                    {{ !(isset($progress['Summary']) && $progress['Summary']['accessible']) ? 'onclick="return false;"' : '' }}>
+                    Summary
                 </a>
 
-                <a href="{{ route('design-factors.index', 'DF3') }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF3' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
-                    DF3: Risk Profile
-                </a>
-
-                <a href="{{ route('design-factors.index', 'DF4') }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF4' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
-                    DF4: IT-Related Issues
+                {{-- DF5 Tab --}}
+                @php
+                    $df5Active = $type === 'DF5';
+                    $df5Accessible = isset($progress['DF5']) && $progress['DF5']['accessible'];
+                    $df5Completed = isset($progress['DF5']) && $progress['DF5']['completed'];
+                @endphp
+                <a href="{{ $df5Accessible ? route('design-factors.index', 'DF5') : '#' }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
+                        {{ $df5Active ? 'bg-green-600 text-white shadow-lg' : ($df5Accessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
+                    {{ !$df5Accessible ? 'onclick="return false;"' : '' }}>
+                    DF5: Governance Objectives
+                    @if($df5Completed)
+                        <span class="text-lg">✅</span>
+                    @endif
                 </a>
             </div>
 
@@ -274,6 +325,28 @@
                             clip-rule="evenodd"></path>
                     </svg>
                     <span class="text-green-800">{{ session('success') }}</span>
+                </div>
+            @endif
+
+            <!-- Error Alert -->
+            @if(session('error'))
+                <div class="flex items-center p-4 mb-6 bg-red-100 border border-red-300 rounded-lg shadow-sm">
+                    <svg class="w-5 h-5 mr-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-red-800">{{ session('error') }}</span>
+                </div>
+            @endif
+
+            <!-- Lock Warning Banner -->
+            @if(isset($designFactor) && $designFactor->is_locked)
+                <div class="flex items-center p-4 mb-6 bg-yellow-100 border border-yellow-300 rounded-lg shadow-sm">
+                    <svg class="w-5 h-5 mr-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-yellow-800 font-semibold">🔒 Design Factor ini sudah terkunci dan tidak dapat diubah.</span>
                 </div>
             @endif
 
@@ -293,117 +366,171 @@
                                 Risk Scenario Categories
                             @elseif($type === 'DF4')
                                 IT-Related Issues
+                            @elseif($type === 'DF5')
+                                Governance and Management Objectives Importance
                             @endif
                         </h2>
                     </div>
                     <div class="p-4 bg-white">
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                            <!-- Table container -->
-                            <div class="lg:col-span-9 xl:col-span-10 overflow-x-auto min-w-0">
-                                <table
-                                    class="{{ in_array($type, ['DF1', 'DF2']) ? 'strategic-table' : 'clean-table' }}">
-                                    <thead>
-                                        <tr>
-                                            @if($type === 'DF3')
-                                                <th style="min-width: 400px;">Risk Scenario Category</th>
-                                                <th style="min-width: 100px;">Impact<br>(1-5)</th>
-                                                <th style="min-width: 100px;">Likelihood<br>(1-5)</th>
-                                                <th style="min-width: 100px;">Risk Rating</th>
-                                            @elseif($type === 'DF4')
-                                                <th style="min-width: 500px;">IT-Related Issue</th>
-                                                <th style="min-width: 150px;">Importance</th>
-                                            @else
-                                                <th style="min-width: 350px;">Value</th>
-                                                <th style="min-width: 150px;">Importance (1-5)</th>
-                                            @endif
-                                            <th style="min-width: 100px;">Baseline</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($metadata as $key => $data)
+                            @if($type === 'DF5')
+                                <div class="w-full overflow-x-auto">
+                                    <table class="strategic-table">
+                                        <thead>
                                             <tr>
-                                                <td class="font-medium text-gray-700">{{ $data['name'] }}</td>
-
-                                                @if($type === 'DF3')
-                                                    <td class="p-0">
-                                                        <input type="number" name="inputs[{{ $key }}][impact]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.impact', 3) }}"
-                                                            min="1" max="5" class="heat-input df3-input impact-input"
-                                                            data-key="{{ $key }}">
-                                                    </td>
-                                                    <td class="p-0">
-                                                        <input type="number" name="inputs[{{ $key }}][likelihood]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.likelihood', 3) }}"
-                                                            min="1" max="5" class="heat-input df3-input likelihood-input"
-                                                            data-key="{{ $key }}">
-                                                    </td>
-                                                    <td class="bg-white p-0">
-                                                        <div class="flex items-center justify-center p-2">
-                                                            <div class="w-4 h-4 rounded-full risk-dot shadow-sm"
-                                                                data-key="{{ $key }}"></div>
-                                                        </div>
-                                                    </td>
-                                                @elseif($type === 'DF4')
-                                                    <td class="df4-importance-cell">
-                                                        <div class="flex justify-center gap-3">
-                                                            @php
-                                                                $currentImportance = data_get($designFactor->inputs, $key . '.importance', 1);
-                                                            @endphp
-                                                            <label class="flex flex-col items-center cursor-pointer">
-                                                                <input type="radio" 
-                                                                    name="inputs[{{ $key }}][importance]" 
-                                                                    value="1"
-                                                                    class="importance-icon-radio green importance-input"
-                                                                    data-key="{{ $key }}"
-                                                                    {{ $currentImportance == 1 ? 'checked' : '' }}>
-                                                            </label>
-                                                            <label class="flex flex-col items-center cursor-pointer">
-                                                                <input type="radio" 
-                                                                    name="inputs[{{ $key }}][importance]" 
-                                                                    value="2"
-                                                                    class="importance-icon-radio yellow importance-input"
-                                                                    data-key="{{ $key }}"
-                                                                    {{ $currentImportance == 2 ? 'checked' : '' }}>
-                                                            </label>
-                                                            <label class="flex flex-col items-center cursor-pointer">
-                                                                <input type="radio" 
-                                                                    name="inputs[{{ $key }}][importance]" 
-                                                                    value="3"
-                                                                    class="importance-icon-radio red importance-input"
-                                                                    data-key="{{ $key }}"
-                                                                    {{ $currentImportance == 3 ? 'checked' : '' }}>
-                                                            </label>
-                                                        </div>
-                                                    </td>
-                                                @else
-                                                    <td class="importance-cell">
-                                                        <input type="number" name="inputs[{{ $key }}][importance]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
-                                                            min="1" max="5"
-                                                            class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
-                                                            data-key="{{ $key }}">
-                                                    </td>
-                                                @endif
-
-                                                <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
-                                                    @php
-                                                        $baselineDefault = 3;
-                                                        if ($type === 'DF3') {
-                                                            $baselineDefault = 9;
-                                                        } elseif ($type === 'DF4') {
-                                                            $baselineDefault = 2;
-                                                        }
-                                                    @endphp
-                                                    {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
-                                                    <input type="hidden" name="inputs[{{ $key }}][baseline]"
-                                                        value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
-                                                        class="baseline-input">
-                                                </td>
+                                                <th style="min-width: 350px;">Governance/Management Objectives</th>
+                                                <th style="min-width: 150px;">Importance (%)</th>
+                                                <th style="min-width: 150px;">Baseline (%)</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Set of Governance and Management Objectives (High)</td>
+                                                <td class="importance-cell">
+                                                    <input type="number" name="importance_high" id="importance_high"
+                                                        value="{{ $df5->importance_high ?? 50 }}" min="0" max="100"
+                                                        step="0.01"
+                                                        class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df5-input"
+                                                        {{ (isset($df5) && method_exists($df5, 'is_locked') && $df5->is_locked) ? 'disabled readonly' : '' }}>
+                                                </td>
+                                                <td class="baseline-col text-center font-bold">33%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Set of Governance and Management Objectives (Normal)</td>
+                                                <td class="importance-cell">
+                                                    <input type="number" name="importance_normal" id="importance_normal"
+                                                        value="{{ $df5->importance_normal ?? 50 }}" min="0" max="100"
+                                                        step="0.01"
+                                                        class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df5-input"
+                                                        {{ (isset($df5) && method_exists($df5, 'is_locked') && $df5->is_locked) ? 'disabled readonly' : '' }}>
+                                                </td>
+                                                <td class="baseline-col text-center font-bold">67%</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="bg-gray-100 font-bold">
+                                                <td class="text-right pr-4">Total Importance:</td>
+                                                <td class="text-center">
+                                                    <span id="totalPercentageDisplay" class="text-lg">100%</span>
+                                                </td>
+                                                <td class="text-center">100%</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            @else
+                                <!-- Table container -->
+                                <div class="lg:col-span-9 xl:col-span-10 overflow-x-auto min-w-0">
+                                    <table
+                                        class="{{ in_array($type, ['DF1', 'DF2']) ? 'strategic-table' : 'clean-table' }}">
+                                        <thead>
+                                            <tr>
+                                                @if($type === 'DF3')
+                                                    <th style="min-width: 400px;">Risk Scenario Category</th>
+                                                    <th style="min-width: 100px;">Impact<br>(1-5)</th>
+                                                    <th style="min-width: 100px;">Likelihood<br>(1-5)</th>
+                                                    <th style="min-width: 100px;">Risk Rating</th>
+                                                @elseif($type === 'DF4')
+                                                    <th style="min-width: 500px;">IT-Related Issue</th>
+                                                    <th style="min-width: 150px;">Importance</th>
+                                                @else
+                                                    <th style="min-width: 350px;">Value</th>
+                                                    <th style="min-width: 150px;">Importance (1-5)</th>
+                                                @endif
+                                                <th style="min-width: 100px;">Baseline</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($metadata as $key => $data)
+                                                <tr>
+                                                    <td class="font-medium text-gray-700">{{ $data['name'] }}</td>
+    
+                                                    @if($type === 'DF3')
+                                                        <td class="p-0">
+                                                            <input type="number" name="inputs[{{ $key }}][impact]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.impact', 3) }}"
+                                                                min="1" max="5" class="heat-input df3-input impact-input"
+                                                                data-key="{{ $key }}"
+                                                                {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                        </td>
+                                                        <td class="p-0">
+                                                            <input type="number" name="inputs[{{ $key }}][likelihood]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.likelihood', 3) }}"
+                                                                min="1" max="5" class="heat-input df3-input likelihood-input"
+                                                                data-key="{{ $key }}"
+                                                                {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                        </td>
+                                                        <td class="bg-white p-0">
+                                                            <div class="flex items-center justify-center p-2">
+                                                                <div class="w-4 h-4 rounded-full risk-dot shadow-sm"
+                                                                    data-key="{{ $key }}"></div>
+                                                            </div>
+                                                        </td>
+                                                    @elseif($type === 'DF4')
+                                                        <td class="df4-importance-cell">
+                                                            <div class="flex justify-center gap-3">
+                                                                @php
+                                                                    $currentImportance = data_get($designFactor->inputs, $key . '.importance', 1);
+                                                                @endphp
+                                                                <label class="flex flex-col items-center cursor-pointer">
+                                                                    <input type="radio" 
+                                                                        name="inputs[{{ $key }}][importance]" 
+                                                                        value="1"
+                                                                        class="importance-icon-radio green importance-input"
+                                                                        data-key="{{ $key }}"
+                                                                        {{ $currentImportance == 1 ? 'checked' : '' }}
+                                                                        {{ $designFactor->is_locked ? 'disabled' : '' }}>
+                                                                </label>
+                                                                <label class="flex flex-col items-center cursor-pointer">
+                                                                    <input type="radio" 
+                                                                        name="inputs[{{ $key }}][importance]" 
+                                                                        value="2"
+                                                                        class="importance-icon-radio yellow importance-input"
+                                                                        data-key="{{ $key }}"
+                                                                        {{ $currentImportance == 2 ? 'checked' : '' }}
+                                                                        {{ $designFactor->is_locked ? 'disabled' : '' }}>
+                                                                </label>
+                                                                <label class="flex flex-col items-center cursor-pointer">
+                                                                    <input type="radio" 
+                                                                        name="inputs[{{ $key }}][importance]" 
+                                                                        value="3"
+                                                                        class="importance-icon-radio red importance-input"
+                                                                        data-key="{{ $key }}"
+                                                                        {{ $currentImportance == 3 ? 'checked' : '' }}
+                                                                        {{ $designFactor->is_locked ? 'disabled' : '' }}>
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                    @else
+                                                        <td class="importance-cell">
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
+                                                                min="1" max="5"
+                                                                class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
+                                                                data-key="{{ $key }}"
+                                                                {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                        </td>
+                                                    @endif
+    
+                                                    <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
+                                                        @php
+                                                            $baselineDefault = 3;
+                                                            if ($type === 'DF3') {
+                                                                $baselineDefault = 9;
+                                                            } elseif ($type === 'DF4') {
+                                                                $baselineDefault = 2;
+                                                            }
+                                                        @endphp
+                                                        {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
+                                                        <input type="hidden" name="inputs[{{ $key }}][baseline]"
+                                                            value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
+                                                            class="baseline-input">
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
 
                             @if($type === 'DF3')
                                 <!-- Legend container -->
@@ -459,22 +586,12 @@
                     </div>
                 </div>
 
-                <!-- Section 2: Calculated Values -->
-                <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
-                    <div class="p-5 bg-green-50 border border-green-200 rounded-xl shadow-sm">
-                        <p class="text-sm font-medium text-green-700">Average Importance</p>
-                        <p class="mt-1 text-3xl font-bold text-green-600" id="avgImpDisplay">
-                            {{ number_format($avgImp, 2) }}
-                        </p>
-                    </div>
-
-                    <div class="p-5 bg-purple-50 border border-purple-200 rounded-xl shadow-sm">
-                        <p class="text-sm font-medium text-purple-700">Relative Weighted Factor</p>
-                        <p class="mt-1 text-3xl font-bold text-purple-600" id="weightDisplay">
-                            {{ number_format($weight, 6) }}
-                        </p>
-                    </div>
+                <!-- Section 2: Calculated Values (Hidden for all DFs) -->
+                <div class="hidden">
+                    <span id="avgImpDisplay"></span>
+                    <span id="weightDisplay"></span>
                 </div>
+
 
                 <!-- Section 3: Governance Outcomes -->
                 <div class="mb-6 overflow-hidden light-card rounded-xl shadow-sm">
@@ -487,85 +604,154 @@
                             <thead>
                                 <tr>
                                     <th>Objective Code</th>
-                                    <th>Mapping Score</th>
-                                    <th>Mapping Baseline</th>
+                                    <th>Score</th>
+                                    <th>Baseline Score</th>
                                     <th>Relative Importance</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($designFactor->items as $index => $item)
-                                    <tr>
-                                        <td>
-                                            <span
-                                                class="px-3 py-1 text-sm font-black rounded
-                                                                                                                    @if(str_starts_with($item->code, 'EDM')) badge-edm
-                                                                                                                    @elseif(str_starts_with($item->code, 'APO')) badge-apo
-                                                                                                                    @elseif(str_starts_with($item->code, 'BAI')) badge-bai
-                                                                                                                    @elseif(str_starts_with($item->code, 'DSS')) badge-dss
-                                                                                                                    @elseif(str_starts_with($item->code, 'MEA')) badge-mea
-                                                                                                                    @endif">
-                                                {{ $item->code }}
-                                            </span>
-                                            <input type="hidden" name="items[{{ $index }}][code]" value="{{ $item->code }}">
-                                            <input type="hidden" name="items[{{ $index }}][score]"
-                                                value="{{ $item->score }}" class="item-score-hidden">
-                                            <input type="hidden" name="items[{{ $index }}][baseline_score]"
-                                                value="{{ $item->baseline_score }}" class="item-baseline-hidden">
-                                        </td>
-                                        <td class="font-bold text-gray-700 item-score-display">{{ $item->score }}
-                                        </td>
-                                        <td class="font-bold text-gray-700 item-baseline-display">
-                                            {{ $item->baseline_score }}
-                                        </td>
-                                        <td>
-                                            <span class="relative-importance font-black text-lg
-                                                                                                                    @if($item->relative_importance > 0) value-positive
-                                                                                                                    @elseif($item->relative_importance < 0) value-negative
-                                                                                                                    @else value-neutral
-                                                                                                                    @endif"
-                                                data-index="{{ $index }}">
-                                                {{ $item->relative_importance > 0 ? '+' : '' }}{{ (int) $item->relative_importance }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                @if($type === 'DF5')
+                                    @foreach($results as $index => $result)
+                                        <tr>
+                                            <td>
+                                                <span class="px-3 py-1 text-sm font-black rounded
+                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                    @endif">
+                                                    {{ $result['code'] }}
+                                                </span>
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-score-display">
+                                                {{ number_format($result['score'] / 100, 2) }}
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-baseline-display">
+                                                {{ number_format($result['baseline_score'] / 100, 2) }}
+                                            </td>
+                                            <td>
+                                                <span class="relative-importance font-black text-lg
+                                                    @if($result['relative_importance'] > 0) value-positive
+                                                    @elseif($result['relative_importance'] < 0) value-negative
+                                                    @else value-neutral
+                                                    @endif"
+                                                    data-index="{{ $index }}">
+                                                    {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    @foreach($designFactor->items as $index => $item)
+                                        <tr>
+                                            <td>
+                                                <span
+                                                    class="px-3 py-1 text-sm font-black rounded
+                                                                                                                        @if(str_starts_with($item->code, 'EDM')) badge-edm
+                                                                                                                        @elseif(str_starts_with($item->code, 'APO')) badge-apo
+                                                                                                                        @elseif(str_starts_with($item->code, 'BAI')) badge-bai
+                                                                                                                        @elseif(str_starts_with($item->code, 'DSS')) badge-dss
+                                                                                                                        @elseif(str_starts_with($item->code, 'MEA')) badge-mea
+                                                                                                                        @endif">
+                                                    {{ $item->code }}
+                                                </span>
+                                                <input type="hidden" name="items[{{ $index }}][code]" value="{{ $item->code }}">
+                                                <input type="hidden" name="items[{{ $index }}][score]"
+                                                    value="{{ number_format($item->score, 1, '.', '') }}" class="item-score-hidden">
+                                                <input type="hidden" name="items[{{ $index }}][baseline_score]"
+                                                    value="{{ number_format($item->baseline_score, 1, '.', '') }}" class="item-baseline-hidden">
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-score-display">{{ $item->score }}
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-baseline-display">
+                                                {{ $item->baseline_score }}
+                                            </td>
+                                            <td>
+                                                <span class="relative-importance font-black text-lg
+                                                                                                                        @if($item->relative_importance > 0) value-positive
+                                                                                                                        @elseif($item->relative_importance < 0) value-negative
+                                                                                                                        @else value-neutral
+                                                                                                                        @endif"
+                                                    data-index="{{ $index }}">
+                                                    {{ $item->relative_importance > 0 ? '+' : '' }}{{ (int) $item->relative_importance }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Section 4: Charts -->
-                <div class="grid grid-cols-1 gap-6 mb-8 xl:grid-cols-2">
+                <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
                     <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
                         <h3 class="mb-2 text-lg font-bold text-gray-800">{{ $type }} Output</h3>
-                        <div class="relative" style="height: 700px;">
+                        <div class="relative" style="height: {{ $type === 'DF4' ? '1000px' : '700px' }};">
                             <canvas id="barChart"></canvas>
                         </div>
                     </div>
 
                     <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
                         <h3 class="mb-2 text-lg font-bold text-gray-800">{{ $type }} Radar</h3>
-                        <div class="relative" style="height: 700px;">
+                        <div class="relative" style="height: {{ $type === 'DF4' ? '1000px' : '700px' }};">
                             <canvas id="radarChart"></canvas>
                         </div>
                     </div>
                 </div>
 
+
                 <!-- Action Button -->
-                <div class="flex justify-center p-6 bg-slate-50 border border-gray-200 rounded-xl shadow-inner">
-                    <button type="submit"
-                        class="flex items-center px-10 py-4 text-base font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transform hover:scale-105 transition-all shadow-lg">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
-                            </path>
-                        </svg>
-                        Simpan Analisis {{ $type }}
-                    </button>
+                <div class="flex justify-center gap-4 p-6 bg-slate-50 border border-gray-200 rounded-xl shadow-inner">
+                    @if(isset($designFactor) && $designFactor->is_locked)
+                        <div class="flex items-center px-10 py-4 text-base font-bold text-gray-600 bg-gray-300 rounded-xl shadow-lg cursor-not-allowed">
+                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Terkunci
+                        </div>
+                    @else
+                        <button type="submit"
+                            class="flex items-center px-10 py-4 text-base font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transform hover:scale-105 transition-all shadow-lg">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                                </path>
+                            </svg>
+                            Simpan Analisis {{ $type }}
+                        </button>
+                        
+                        <!-- Reset All Button -->
+                        <button type="button" onclick="confirmResetAll()"
+                            class="flex items-center px-10 py-4 text-base font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transform hover:scale-105 transition-all shadow-lg">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                </path>
+                            </svg>
+                            Reset Semua DF
+                        </button>
+                    @endif
                 </div>
             </form>
+
+            <!-- Hidden form for reset all -->
+            <form id="resetAllForm" action="{{ route('design-factors.reset-all') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
+
+            <script>
+                function confirmResetAll() {
+                    if (confirm('⚠️ PERINGATAN!\n\nApakah Anda yakin ingin mereset SEMUA Design Factor (DF1, DF2, DF3, DF4)?\n\nSemua data yang telah diisi akan dihapus dan dikembalikan ke nilai default.\n\nTindakan ini TIDAK DAPAT dibatalkan!')) {
+                        document.getElementById('resetAllForm').submit();
+                    }
+                }
+            </script>
         </div>
     </div>
+
 
     @push('scripts')
         <script>
@@ -583,8 +769,12 @@
                 document.querySelectorAll('.item-score-hidden').forEach(input => itemScores.push(parseFloat(input.value) || 0));
                 document.querySelectorAll('.item-baseline-hidden').forEach(input => itemBaselines.push(parseFloat(input.value) || 0));
 
-                let chartLabels = @json($designFactor->items->pluck('code'));
-                let chartData = [];
+                let chartLabels = factorType === 'DF5' 
+                    ? @json(isset($results) ? $results->pluck('code') : [])
+                    : @json(isset($designFactor) && isset($designFactor->items) ? $designFactor->items->pluck('code') : []);
+                let chartData = factorType === 'DF5'
+                    ? @json(isset($results) ? $results->pluck('relative_importance') : [])
+                    : [];
                 let barChart, radarChart;
 
                 function updateRiskDisplays() {
@@ -609,14 +799,16 @@
                             const rating = categories[key].impact * categories[key].likelihood;
                             const dot = document.querySelector(`.risk-dot[data-key="${key}"]`);
 
-                            if (dot) {
-                                dot.className = 'w-4 h-4 rounded-full risk-dot shadow-sm';
-                                dot.style.border = '1px solid #000';
-                                if (rating >= 15) dot.style.backgroundColor = '#c00000'; // Very High
-                                else if (rating >= 8) dot.style.backgroundColor = '#edbd70'; // High
-                                else if (rating >= 4) dot.style.backgroundColor = '#72a488'; // Normal
-                                else dot.style.backgroundColor = '#4b4b4b'; // Low
-                            }
+                        }
+                    } else if (factorType === 'DF5') {
+                        // Total percentage display for DF5
+                        const high = parseFloat(document.getElementById('importance_high').value) || 0;
+                        const normal = parseFloat(document.getElementById('importance_normal').value) || 0;
+                        const total = high + normal;
+                        const display = document.getElementById('totalPercentageDisplay');
+                        if (display) {
+                            display.innerText = total.toFixed(2) + '%';
+                            display.className = Math.abs(total - 100) < 0.01 ? 'text-lg text-green-600' : 'text-lg text-red-600';
                         }
                     }
                 }
@@ -645,7 +837,7 @@
                             plugins: { legend: { display: false } },
                             scales: {
                                 x: { min: -100, max: 100, grid: { color: '#e5e7eb' }, ticks: { stepSize: 25 } },
-                                y: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
+                                y: { grid: { display: true, borderDash: [5, 5], color: '#e5e7eb' }, ticks: { font: { weight: 'bold' }, autoSkip: false } }
                             }
                         }
                     });
@@ -671,7 +863,7 @@
                             scales: {
                                 r: {
                                     min: 0, max: 200,
-                                    ticks: { stepSize: 50, callback: v => v - 100, backdropColor: 'transparent' },
+                                    ticks: { stepSize: 25, callback: v => v - 100, backdropColor: 'transparent' },
                                     pointLabels: { font: { size: 10, weight: 'bold' } }
                                 }
                             }
@@ -688,8 +880,15 @@
                     radarChart.update('none');
                 }
 
+
                 function calculate() {
                     updateRiskDisplays();
+                    
+                    if (factorType === 'DF5') {
+                        autoCalculateDF5();
+                        return;
+                    }
+
                     let totalVal = 0;
                     let totalBase = 0;
                     let count = 0;
@@ -708,10 +907,29 @@
                         }
                         baselineInputs.forEach(input => totalBase += parseFloat(input.value) || 9);
                     } else {
-                        importanceInputs.forEach(input => {
-                            totalVal += parseFloat(input.value) || 1;
-                            count++;
-                        });
+                        // For DF4, need to get the checked radio button value for each group
+                        if (factorType === 'DF4') {
+                            // Get all unique keys from importance inputs
+                            const keys = new Set();
+                            importanceInputs.forEach(input => {
+                                if (input.dataset.key) keys.add(input.dataset.key);
+                            });
+                            
+                            // For each key, get the checked radio button value
+                            keys.forEach(key => {
+                                const checkedRadio = document.querySelector(`.importance-input[data-key="${key}"]:checked`);
+                                if (checkedRadio) {
+                                    totalVal += parseFloat(checkedRadio.value) || 1;
+                                    count++;
+                                }
+                            });
+                        } else {
+                            // For DF1, DF2 - simple input fields
+                            importanceInputs.forEach(input => {
+                                totalVal += parseFloat(input.value) || 1;
+                                count++;
+                            });
+                        }
                         // DF4 has baseline=2, others have baseline=3
                         const defaultBaseline = (factorType === 'DF4') ? 2 : 3;
                         baselineInputs.forEach(input => totalBase += parseFloat(input.value) || defaultBaseline);
@@ -757,11 +975,64 @@
                     updateCharts();
                 }
 
-                importanceInputs.forEach(input => input.addEventListener('input', calculate));
+
+                function autoCalculateDF5() {
+                    const high = parseFloat(document.getElementById('importance_high').value) || 0;
+                    const normal = parseFloat(document.getElementById('importance_normal').value) || 0;
+
+                    fetch("{{ route('design-factors.df5.calculate') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({ importance_high: high, importance_normal: normal })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.results) {
+                            const resultsArray = Object.values(data.results);
+                            chartData = [];
+                            
+                            resultsArray.forEach((result, index) => {
+                                const span = document.querySelector(`.relative-importance[data-index="${index}"]`);
+                                if (span) {
+                                    const val = Math.round(result.relative_importance);
+                                    span.innerText = (val > 0 ? '+' : '') + val;
+                                    span.className = 'relative-importance font-black text-lg ' +
+                                        (val > 0 ? 'value-positive' : (val < 0 ? 'value-negative' : 'value-neutral'));
+                                    
+                                    const row = span.closest('tr');
+                                    if (row) {
+                                        const scoreCell = row.querySelector('.item-score-display');
+                                        const baselineCell = row.querySelector('.item-baseline-display');
+                                        if (scoreCell) scoreCell.innerText = (result.score / 100).toFixed(2);
+                                        if (baselineCell) baselineCell.innerText = (result.baseline_score / 100).toFixed(2);
+                                    }
+                                }
+                                chartData.push(result.relative_importance);
+                            });
+                            updateCharts();
+                        }
+                    })
+                    .catch(error => console.error('Error calculating DF5:', error));
+                }
+
+                importanceInputs.forEach(input => {
+                    input.addEventListener('input', calculate);
+                    input.addEventListener('change', calculate);
+                });
                 df3Inputs.forEach(input => input.addEventListener('input', calculate));
+                document.querySelectorAll('.df5-input').forEach(input => input.addEventListener('input', calculate));
 
                 initCharts();
-                calculate();
+                if (factorType === 'DF5') {
+                    updateCharts();
+                } else {
+                    calculate();
+                }
+
+
             });
         </script>
     @endpush
