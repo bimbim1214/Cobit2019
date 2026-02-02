@@ -189,6 +189,13 @@
                         <h2 class="text-xl font-bold text-green-600">Importance Input (100%)</h2>
                         <p class="mt-1 text-sm text-gray-600">Total harus sama dengan 100%</p>
                     </div>
+                    <!-- Smart Message Box -->
+                    <div id="smartMessageBox" class="mx-4 mt-4 p-3 rounded-lg border hidden">
+                        <div class="flex items-center">
+                            <div id="smartMessageIcon" class="mr-3"></div>
+                            <div id="smartMessageContent" class="text-sm font-medium"></div>
+                        </div>
+                    </div>
                     <div class="p-4 bg-white">
                         <table class="df5-input-table">
                             <thead>
@@ -254,12 +261,12 @@
                                     <tr>
                                         <td>
                                             <span class="px-3 py-1 text-sm font-black rounded
-                                                                                @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                @endif">
+                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                    @endif">
                                                 {{ $result['code'] }}
                                             </span>
                                             <span class="ml-2">{{ $result['name'] }}</span>
@@ -268,10 +275,10 @@
                                         <td class="font-bold">{{ number_format($result['baseline_score'] / 100, 2) }}</td>
                                         <td>
                                             <span class="font-black text-lg
-                                                                                @if($result['relative_importance'] > 0) value-positive
-                                                                                @elseif($result['relative_importance'] < 0) value-negative
-                                                                                @else value-neutral
-                                                                                @endif">
+                                                                                    @if($result['relative_importance'] > 0) value-positive
+                                                                                    @elseif($result['relative_importance'] < 0) value-negative
+                                                                                    @else value-neutral
+                                                                                    @endif">
                                                 {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                             </span>
                                         </td>
@@ -355,19 +362,53 @@
                 const validationMessage = document.getElementById('validationMessage');
                 const saveBtn = document.getElementById('saveBtn');
 
-                function updateTotal() {
+                function updateSmartMessage(high, normal, total, lastTarget) {
+                    const smartBox = document.getElementById('smartMessageBox');
+                    const smartIcon = document.getElementById('smartMessageIcon');
+                    const smartContent = document.getElementById('smartMessageContent');
+                    
+                    if (!smartBox) return;
+                    smartBox.classList.remove('hidden');
+
+                    if (Math.abs(total - 100) < 0.01) {
+                        smartBox.className = 'mx-4 mt-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
+                        smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                        smartContent.innerText = 'Total sudah tepat 100%. Data siap disimpan.';
+                    } else if (total > 100) {
+                        smartBox.className = 'mx-4 mt-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                        smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                        smartContent.innerText = `Total (${total.toFixed(2)}%) melebihi 100%! Mohon kurangi nilai agar pas 100%.`;
+                    } else {
+                        // total < 100
+                        smartBox.className = 'mx-4 mt-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800';
+                        smartIcon.innerHTML = '<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';
+                        
+                        let suggestion = '';
+                        if (lastTarget === 'high') {
+                            const needed = 100 - high;
+                            suggestion = `Saran: Jika 'High' diisi ${high}%, maka isi 'Normal' dengan ${needed.toFixed(2)}% agar total 100%.`;
+                        } else {
+                            const needed = 100 - normal;
+                            suggestion = `Saran: Jika 'Normal' diisi ${normal}%, maka isi 'High' dengan ${needed.toFixed(2)}% agar total 100%.`;
+                        }
+                        smartContent.innerText = suggestion;
+                    }
+                }
+
+                function updateTotal(lastTarget = 'high') {
                     const high = parseFloat(highInput.value) || 0;
                     const normal = parseFloat(normalInput.value) || 0;
                     const total = high + normal;
 
                     totalDisplay.textContent = total.toFixed(2) + '%';
+                    updateSmartMessage(high, normal, total, lastTarget);
 
                     if (Math.abs(total - 100) < 0.01) {
                         validationMessage.innerHTML = '<span class="validation-success">✓ Valid</span>';
                         saveBtn.disabled = false;
                         saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     } else {
-                        validationMessage.innerHTML = '<span class="validation-error">✗ Total harus 100%</span>';
+                        validationMessage.innerHTML = '<span class="validation-error">✗ Total harus tepat 100%</span>';
                         saveBtn.disabled = true;
                         saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     }
@@ -403,12 +444,12 @@
 
                 // Update total and auto-calculate on input change
                 highInput.addEventListener('input', function () {
-                    updateTotal();
+                    updateTotal('high');
                     autoCalculate();
                 });
 
                 normalInput.addEventListener('input', function () {
-                    updateTotal();
+                    updateTotal('normal');
                     autoCalculate();
                 });
 
@@ -423,22 +464,22 @@
                         const sign = result.relative_importance > 0 ? '+' : '';
 
                         const row = `
-                                                        <tr>
-                                                            <td>
-                                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">
-                                                                    ${result.code}
-                                                                </span>
-                                                                <span class="ml-2">${result.name}</span>
-                                                            </td>
-                                                            <td class="font-bold">${(parseFloat(result.score) / 100).toFixed(2)}</td>
-                                                            <td class="font-bold">${(parseFloat(result.baseline_score) / 100).toFixed(2)}</td>
-                                                            <td>
-                                                                <span class="font-black text-lg ${valueClass}">
-                                                                    ${sign}${Math.round(result.relative_importance)}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    `;
+                                                            <tr>
+                                                                <td>
+                                                                    <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">
+                                                                        ${result.code}
+                                                                    </span>
+                                                                    <span class="ml-2">${result.name}</span>
+                                                                </td>
+                                                                <td class="font-bold">${(parseFloat(result.score) / 100).toFixed(2)}</td>
+                                                                <td class="font-bold">${(parseFloat(result.baseline_score) / 100).toFixed(2)}</td>
+                                                                <td>
+                                                                    <span class="font-black text-lg ${valueClass}">
+                                                                        ${sign}${Math.round(result.relative_importance)}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        `;
                         tbody.innerHTML += row;
                     });
                 }

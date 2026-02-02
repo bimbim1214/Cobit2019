@@ -125,11 +125,10 @@ class DesignFactorController extends Controller
                 'importance_normal' => 'required|numeric|min:0|max:100',
             ]);
 
-            // Validation for sum = 100%
             $sum = $validated['importance_high'] + $validated['importance_normal'];
             if (abs($sum - 100.00) > 0.01) {
                 return redirect()->route('design-factors.index', ['type' => 'DF5'])
-                    ->with('error', 'Total importance harus sama dengan 100%! (Saat ini: ' . $sum . '%)');
+                    ->with('error', 'Total importance harus tepat 100%! (Saat ini: ' . number_format($sum, 2) . '%)');
             }
 
             \App\Models\DesignFactor5::updateOrCreate(
@@ -560,7 +559,7 @@ class DesignFactorController extends Controller
         $sum = $validated['importance_high'] + $validated['importance_normal'];
         if (abs($sum - 100.00) > 0.01) {
             return redirect()->route('design-factors.df5')
-                ->with('error', 'Total importance harus sama dengan 100%! (Saat ini: ' . $sum . '%)');
+                ->with('error', 'Total importance harus tepat 100%! (Saat ini: ' . number_format($sum, 2) . '%)');
         }
 
         // Update or create DF5
