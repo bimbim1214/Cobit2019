@@ -243,76 +243,50 @@
                 <p class="mt-2 text-gray-600">Tailoring Governance System based on Design Factors</p>
             </div>
 
-            <!-- Progress Bar -->
-            @php
-                $completedCount = 0;
-                foreach(['DF1', 'DF2', 'DF3', 'DF4', 'DF5'] as $df) {
-                    if(isset($progress[$df]) && $progress[$df]['completed']) {
-                        $completedCount++;
-                    }
-                }
-                $progressPercent = ($completedCount / 6) * 100; // 6 steps including Summary
-            @endphp
-            <div class="mb-6 bg-white rounded-xl shadow-sm p-4">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-semibold text-gray-700">Progress Keseluruhan</span>
-                    <span class="text-sm font-bold text-green-600">{{ number_format($progressPercent, 0) }}%</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-3">
-                    <div class="bg-green-600 h-3 rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
-                </div>
-            </div>
-
             <!-- Design Factor Tabs -->
             <div class="flex flex-wrap justify-center gap-2 mb-8">
-                @php
-                    $tabs = [
-                        'DF1' => 'DF1: Enterprise Strategy',
-                        'DF2' => 'DF2: Enterprise Goals',
-                        'DF3' => 'DF3: Risk Profile',
-                        'DF4' => 'DF4: IT-Related Issues',
-                    ];
-                @endphp
-
-                @foreach($tabs as $tabType => $tabLabel)
-                    @php
-                        $isActive = $type === $tabType;
-                        $isAccessible = isset($progress[$tabType]) && $progress[$tabType]['accessible'];
-                        $isCompleted = isset($progress[$tabType]) && $progress[$tabType]['completed'];
-                    @endphp
-                    <a href="{{ $isAccessible ? route('design-factors.index', $tabType) : '#' }}"
-                        class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
-                            {{ $isActive ? 'bg-green-600 text-white shadow-lg' : ($isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
-                        {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
-                        {{ $tabLabel }}
-                        @if($isCompleted)
-                            <span class="text-lg">✅</span>
-                        @endif
-                    </a>
-                @endforeach
-
-                {{-- Summary Tab --}}
-                <a href="{{ isset($progress['Summary']) && $progress['Summary']['accessible'] ? route('design-factors.summary') : '#' }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all
-                        {{ isset($progress['Summary']) && $progress['Summary']['accessible'] ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}"
-                    {{ !(isset($progress['Summary']) && $progress['Summary']['accessible']) ? 'onclick="return false;"' : '' }}>
-                    Summary
+                <a href="{{ route('design-factors.index', 'DF1') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF1' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF1: Enterprise Strategy
+                </a>
+                <a href="{{ route('design-factors.index', 'DF2') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF2' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF2: Enterprise Goals
                 </a>
 
-                {{-- DF5 Tab --}}
-                @php
-                    $df5Active = $type === 'DF5';
-                    $df5Accessible = isset($progress['DF5']) && $progress['DF5']['accessible'];
-                    $df5Completed = isset($progress['DF5']) && $progress['DF5']['completed'];
-                @endphp
-                <a href="{{ $df5Accessible ? route('design-factors.index', 'DF5') : '#' }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
-                        {{ $df5Active ? 'bg-green-600 text-white shadow-lg' : ($df5Accessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
-                    {{ !$df5Accessible ? 'onclick="return false;"' : '' }}>
-                    DF5: Governance Objectives
-                    @if($df5Completed)
-                        <span class="text-lg">✅</span>
-                    @endif
+                <a href="{{ route('design-factors.index', 'DF3') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF3' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF3: Risk Profile
+                </a>
+
+                <a href="{{ route('design-factors.index', 'DF4') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF4' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF4: IT-Related Issues
+                </a>
+
+                <a href="{{ route('design-factors.index', 'DF6') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF6' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF6: Threat Landscape
+                </a>
+
+                <a href="{{ route('design-factors.index', 'DF7') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF7' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF7: Importance of Role of IT
+                </a>
+
+                <a href="{{ route('design-factors.index', 'DF8') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF8' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF8: Sourcing Model
+                </a>
+
+                <a href="{{ route('design-factors.index', 'DF9') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF9' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF9: IT Implementation
+                </a>
+
+                <a href="{{ route('design-factors.index', 'DF10') }}"
+                    class="px-6 py-2 text-sm font-bold rounded-full transition-all {{ $type === 'DF10' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-200' }}">
+                    DF10: Tech Adoption
                 </a>
             </div>
 
@@ -325,28 +299,6 @@
                             clip-rule="evenodd"></path>
                     </svg>
                     <span class="text-green-800">{{ session('success') }}</span>
-                </div>
-            @endif
-
-            <!-- Error Alert -->
-            @if(session('error'))
-                <div class="flex items-center p-4 mb-6 bg-red-100 border border-red-300 rounded-lg shadow-sm">
-                    <svg class="w-5 h-5 mr-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="text-red-800">{{ session('error') }}</span>
-                </div>
-            @endif
-
-            <!-- Lock Warning Banner -->
-            @if(isset($designFactor) && $designFactor->is_locked)
-                <div class="flex items-center p-4 mb-6 bg-yellow-100 border border-yellow-300 rounded-lg shadow-sm">
-                    <svg class="w-5 h-5 mr-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="text-yellow-800 font-semibold">🔒 Design Factor ini sudah terkunci dan tidak dapat diubah.</span>
                 </div>
             @endif
 
@@ -366,171 +318,184 @@
                                 Risk Scenario Categories
                             @elseif($type === 'DF4')
                                 IT-Related Issues
-                            @elseif($type === 'DF5')
-                                Governance and Management Objectives Importance
+                            @elseif($type === 'DF6')
+                                Threat Landscape
+                            @elseif($type === 'DF7')
+                                Importance of Role of IT
+                            @elseif($type === 'DF8')
+                                Importance of Sourcing Model
+                            @elseif($type === 'DF9')
+                                Importance of IT Implementation
+                            @elseif($type === 'DF10')
+                                Technology Adoption Strategy
                             @endif
                         </h2>
                     </div>
                     <div class="p-4 bg-white">
-                            @if($type === 'DF5')
-                                <div class="w-full overflow-x-auto">
-                                    <table class="strategic-table">
-                                        <thead>
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                            <!-- Table container -->
+                            <div class="lg:col-span-9 xl:col-span-10 overflow-x-auto min-w-0">
+                                <table
+                                    class="{{ in_array($type, ['DF1', 'DF2', 'DF6', 'DF7', 'DF8', 'DF10']) ? 'strategic-table' : 'clean-table' }}">
+                                    <thead>
+                                        <tr>
+                                            @if($type === 'DF3')
+                                                <th style="min-width: 400px;">Risk Scenario Category</th>
+                                                <th style="min-width: 100px;">Impact<br>(1-5)</th>
+                                                <th style="min-width: 100px;">Likelihood<br>(1-5)</th>
+                                                <th style="min-width: 100px;">Risk Rating</th>
+                                            @elseif($type === 'DF4')
+                                                <th style="min-width: 500px;">IT-Related Issue</th>
+                                                <th style="min-width: 150px;">Importance</th>
+                                            @elseif($type === 'DF6')
+                                                <th style="min-width: 200px;">Value</th>
+                                                <th style="min-width: 200px;">Importance (100%)</th>
+                                            @elseif($type === 'DF8')
+                                                <th style="min-width: 200px;">Value</th>
+                                                <th style="min-width: 200px;">Importance (100%)</th>
+                                            @elseif($type === 'DF9')
+                                                <th style="min-width: 200px;">Value</th>
+                                                <th style="min-width: 200px;">Importance (100%)</th>
+                                            @elseif($type === 'DF10')
+                                                <th style="min-width: 200px;">Value</th>
+                                                <th style="min-width: 200px;">Importance (100%)</th></th>
+                                            @else
+                                                <th style="min-width: 350px;">Value</th>
+                                                <th style="min-width: 150px;">Importance (1-5)</th>
+                                            @endif
+                                            <th style="min-width: 100px;">Baseline</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($metadata as $key => $data)
                                             <tr>
-                                                <th style="min-width: 350px;">Governance/Management Objectives</th>
-                                                <th style="min-width: 150px;">Importance (%)</th>
-                                                <th style="min-width: 150px;">Baseline (%)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Set of Governance and Management Objectives (High)</td>
-                                                <td class="importance-cell">
-                                                    <input type="number" name="importance_high" id="importance_high"
-                                                        value="{{ $df5->importance_high ?? 50 }}" min="0" max="100"
-                                                        step="0.01"
-                                                        class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df5-input"
-                                                        {{ (isset($df5) && method_exists($df5, 'is_locked') && $df5->is_locked) ? 'disabled readonly' : '' }}>
-                                                </td>
-                                                <td class="baseline-col text-center font-bold">33%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Set of Governance and Management Objectives (Normal)</td>
-                                                <td class="importance-cell">
-                                                    <input type="number" name="importance_normal" id="importance_normal"
-                                                        value="{{ $df5->importance_normal ?? 50 }}" min="0" max="100"
-                                                        step="0.01"
-                                                        class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df5-input"
-                                                        {{ (isset($df5) && method_exists($df5, 'is_locked') && $df5->is_locked) ? 'disabled readonly' : '' }}>
-                                                </td>
-                                                <td class="baseline-col text-center font-bold">67%</td>
-                                            </tr>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr class="bg-gray-100 font-bold">
-                                                <td class="text-right pr-4">Total Importance:</td>
-                                                <td class="text-center">
-                                                    <span id="totalPercentageDisplay" class="text-lg">100%</span>
-                                                </td>
-                                                <td class="text-center">100%</td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            @else
-                                <!-- Table container -->
-                                <div class="lg:col-span-9 xl:col-span-10 overflow-x-auto min-w-0">
-                                    <table
-                                        class="{{ in_array($type, ['DF1', 'DF2']) ? 'strategic-table' : 'clean-table' }}">
-                                        <thead>
-                                            <tr>
+                                                <td class="font-medium text-gray-700">{{ $data['name'] }}</td>
+
                                                 @if($type === 'DF3')
-                                                    <th style="min-width: 400px;">Risk Scenario Category</th>
-                                                    <th style="min-width: 100px;">Impact<br>(1-5)</th>
-                                                    <th style="min-width: 100px;">Likelihood<br>(1-5)</th>
-                                                    <th style="min-width: 100px;">Risk Rating</th>
-                                                @elseif($type === 'DF4')
-                                                    <th style="min-width: 500px;">IT-Related Issue</th>
-                                                    <th style="min-width: 150px;">Importance</th>
-                                                @else
-                                                    <th style="min-width: 350px;">Value</th>
-                                                    <th style="min-width: 150px;">Importance (1-5)</th>
-                                                @endif
-                                                <th style="min-width: 100px;">Baseline</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($metadata as $key => $data)
-                                                <tr>
-                                                    <td class="font-medium text-gray-700">{{ $data['name'] }}</td>
-    
-                                                    @if($type === 'DF3')
-                                                        <td class="p-0">
-                                                            <input type="number" name="inputs[{{ $key }}][impact]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.impact', 3) }}"
-                                                                min="1" max="5" class="heat-input df3-input impact-input"
-                                                                data-key="{{ $key }}"
-                                                                {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
-                                                        </td>
-                                                        <td class="p-0">
-                                                            <input type="number" name="inputs[{{ $key }}][likelihood]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.likelihood', 3) }}"
-                                                                min="1" max="5" class="heat-input df3-input likelihood-input"
-                                                                data-key="{{ $key }}"
-                                                                {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
-                                                        </td>
-                                                        <td class="bg-white p-0">
-                                                            <div class="flex items-center justify-center p-2">
-                                                                <div class="w-4 h-4 rounded-full risk-dot shadow-sm"
-                                                                    data-key="{{ $key }}"></div>
-                                                            </div>
-                                                        </td>
-                                                    @elseif($type === 'DF4')
-                                                        <td class="df4-importance-cell">
-                                                            <div class="flex justify-center gap-3">
-                                                                @php
-                                                                    $currentImportance = data_get($designFactor->inputs, $key . '.importance', 1);
-                                                                @endphp
-                                                                <label class="flex flex-col items-center cursor-pointer">
-                                                                    <input type="radio" 
-                                                                        name="inputs[{{ $key }}][importance]" 
-                                                                        value="1"
-                                                                        class="importance-icon-radio green importance-input"
-                                                                        data-key="{{ $key }}"
-                                                                        {{ $currentImportance == 1 ? 'checked' : '' }}
-                                                                        {{ $designFactor->is_locked ? 'disabled' : '' }}>
-                                                                </label>
-                                                                <label class="flex flex-col items-center cursor-pointer">
-                                                                    <input type="radio" 
-                                                                        name="inputs[{{ $key }}][importance]" 
-                                                                        value="2"
-                                                                        class="importance-icon-radio yellow importance-input"
-                                                                        data-key="{{ $key }}"
-                                                                        {{ $currentImportance == 2 ? 'checked' : '' }}
-                                                                        {{ $designFactor->is_locked ? 'disabled' : '' }}>
-                                                                </label>
-                                                                <label class="flex flex-col items-center cursor-pointer">
-                                                                    <input type="radio" 
-                                                                        name="inputs[{{ $key }}][importance]" 
-                                                                        value="3"
-                                                                        class="importance-icon-radio red importance-input"
-                                                                        data-key="{{ $key }}"
-                                                                        {{ $currentImportance == 3 ? 'checked' : '' }}
-                                                                        {{ $designFactor->is_locked ? 'disabled' : '' }}>
-                                                                </label>
-                                                            </div>
-                                                        </td>
-                                                    @else
-                                                        <td class="importance-cell">
-                                                            <input type="number" name="inputs[{{ $key }}][importance]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
-                                                                min="1" max="5"
-                                                                class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
-                                                                data-key="{{ $key }}"
-                                                                {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
-                                                        </td>
-                                                    @endif
-    
-                                                    <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
-                                                        @php
-                                                            $baselineDefault = 3;
-                                                            if ($type === 'DF3') {
-                                                                $baselineDefault = 9;
-                                                            } elseif ($type === 'DF4') {
-                                                                $baselineDefault = 2;
-                                                            }
-                                                        @endphp
-                                                        {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
-                                                        <input type="hidden" name="inputs[{{ $key }}][baseline]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
-                                                            class="baseline-input">
+                                                    <td class="p-0">
+                                                        <input type="number" name="inputs[{{ $key }}][impact]"
+                                                            value="{{ data_get($designFactor->inputs, $key . '.impact', 3) }}"
+                                                            min="1" max="5" class="heat-input df3-input impact-input"
+                                                            data-key="{{ $key }}">
                                                     </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
+                                                    <td class="p-0">
+                                                        <input type="number" name="inputs[{{ $key }}][likelihood]"
+                                                            value="{{ data_get($designFactor->inputs, $key . '.likelihood', 3) }}"
+                                                            min="1" max="5" class="heat-input df3-input likelihood-input"
+                                                            data-key="{{ $key }}">
+                                                    </td>
+                                                    <td class="bg-white p-0">
+                                                        <div class="flex items-center justify-center p-2">
+                                                            <div class="w-4 h-4 rounded-full risk-dot shadow-sm"
+                                                                data-key="{{ $key }}"></div>
+                                                        </div>
+                                                    </td>
+                                                @elseif($type === 'DF4')
+                                                    <td class="df4-importance-cell">
+                                                        <div class="flex justify-center gap-3">
+                                                            @php
+                                                                $currentImportance = data_get($designFactor->inputs, $key . '.importance', 1);
+                                                            @endphp
+                                                            <label class="flex flex-col items-center cursor-pointer">
+                                                                <input type="radio" name="inputs[{{ $key }}][importance]"
+                                                                    value="1"
+                                                                    class="importance-icon-radio green importance-input"
+                                                                    data-key="{{ $key }}" {{ $currentImportance == 1 ? 'checked' : '' }}>
+                                                            </label>
+                                                            <label class="flex flex-col items-center cursor-pointer">
+                                                                <input type="radio" name="inputs[{{ $key }}][importance]"
+                                                                    value="2"
+                                                                    class="importance-icon-radio yellow importance-input"
+                                                                    data-key="{{ $key }}" {{ $currentImportance == 2 ? 'checked' : '' }}>
+                                                            </label>
+                                                            <label class="flex flex-col items-center cursor-pointer">
+                                                                <input type="radio" name="inputs[{{ $key }}][importance]"
+                                                                    value="3" class="importance-icon-radio red importance-input"
+                                                                    data-key="{{ $key }}" {{ $currentImportance == 3 ? 'checked' : '' }}>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                @elseif($type === 'DF6')
+                                                    <td class="importance-cell">
+                                                        <div class="flex items-center justify-center gap-1">
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'high' ? 25 : ($key === 'normal' ? 75 : 0))) }}"
+                                                                min="0" max="100"
+                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df6-input"
+                                                                data-key="{{ $key }}">
+                                                            <span class="font-bold text-gray-600">%</span>
+                                                        </div>
+                                                    </td>
+                                                @elseif($type === 'DF8')
+                                                    <td class="importance-cell">
+                                                        <div class="flex items-center justify-center gap-1">
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'outsourcing' ? 10 : ($key === 'cloud' ? 50 : 40))) }}"
+                                                                min="0" max="100"
+                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df8-input"
+                                                                data-key="{{ $key }}">
+                                                            <span class="font-bold text-gray-600">%</span>
+                                                        </div>
+                                                    </td>
+                                                @elseif($type === 'DF9')
+                                                    <td class="importance-cell">
+                                                        <div class="flex items-center justify-center gap-1">
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'agile' ? 50 : ($key === 'devops' ? 10 : 40))) }}"
+                                                                min="0" max="100"
+                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df9-input"
+                                                                data-key="{{ $key }}">
+                                                            <span class="font-bold text-gray-600">%</span>
+                                                        </div>
+                                                    </td>
+                                                @elseif($type === 'DF10')
+                                                    <td class="importance-cell">
+                                                        <div class="flex items-center justify-center gap-1">
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'first_mover' ? 75 : ($key === 'follower' ? 15 : 10))) }}"
+                                                                min="0" max="100"
+                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df10-input"
+                                                                data-key="{{ $key }}">
+                                                            <span class="font-bold text-gray-600">%</span>
+                                                        </div>
+                                                    </td>
+                                                @else
+                                                    <td class="importance-cell">
+                                                        <input type="number" name="inputs[{{ $key }}][importance]"
+                                                            value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
+                                                            min="1" max="5"
+                                                            class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
+                                                            data-key="{{ $key }}">
+                                                    </td>
+                                                @endif
+
+                                                <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
+                                                    @php
+                                                        $baselineDefault = 3;
+                                                        if ($type === 'DF3') {
+                                                            $baselineDefault = 9;
+                                                        } elseif ($type === 'DF4') {
+                                                            $baselineDefault = 2;
+                                                        } elseif ($type === 'DF6') {
+                                                            $baselineDefault = $key === 'normal' ? 100 : 0;
+                                                        } elseif ($type === 'DF8') {
+                                                            $baselineDefault = $key === 'insourced' ? 34 : 33;
+                                                        } elseif ($type === 'DF9') {
+                                                            $baselineDefault = $key === 'agile' ? 15 : ($key === 'devops' ? 10 : 75);
+                                                        } elseif ($type === 'DF10') {
+                                                            $baselineDefault = $key === 'first_mover' ? 15 : ($key === 'follower' ? 70 : 15);
+                                                        }
+                                                    @endphp
+                                                    {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}{{ in_array($type, ['DF6', 'DF8', 'DF9', 'DF10']) ? '%' : '' }}
+                                                    <input type="hidden" name="inputs[{{ $key }}][baseline]"
+                                                        value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
+                                                        class="baseline-input">
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
 
                             @if($type === 'DF3')
                                 <!-- Legend container -->
@@ -559,7 +524,7 @@
                                     </div>
                                 </div>
                             @endif
-                            
+
                             @if($type === 'DF4')
                                 <!-- Legend container for DF4 -->
                                 <div class="w-full lg:col-span-3 xl:col-span-2">
@@ -582,16 +547,90 @@
                                     </div>
                                 </div>
                             @endif
+
+                            @if($type === 'DF6')
+                                <!-- DF6 Total Display and Legend -->
+                                <div class="w-full lg:col-span-3 xl:col-span-2">
+                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                        <div class="bg-white p-3 border-b border-gray-400">
+                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                            <p class="text-2xl font-bold" id="df6TotalDisplay">100%</p>
+                                            <p class="text-xs text-gray-500 mt-1" id="df6Warning"></p>
+                                        </div>
+                                        <div class="bg-green-50 p-3">
+                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($type === 'DF8')
+                                <!-- DF8 Total Display and Legend -->
+                                <div class="w-full lg:col-span-3 xl:col-span-2">
+                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                        <div class="bg-white p-3 border-b border-gray-400">
+                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                            <p class="text-2xl font-bold" id="df8TotalDisplay">100%</p>
+                                            <p class="text-xs text-gray-500 mt-1" id="df8Warning"></p>
+                                        </div>
+                                        <div class="bg-green-50 p-3">
+                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($type === 'DF9')
+                                <!-- DF9 Total Display and Legend -->
+                                <div class="w-full lg:col-span-3 xl:col-span-2">
+                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                        <div class="bg-white p-3 border-b border-gray-400">
+                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                            <p class="text-2xl font-bold" id="df9TotalDisplay">100%</p>
+                                            <p class="text-xs text-gray-500 mt-1" id="df9Warning"></p>
+                                        </div>
+                                        <div class="bg-green-50 p-3">
+                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($type === 'DF10')
+                                <!-- DF10 Total Display and Legend -->
+                                <div class="w-full lg:col-span-3 xl:col-span-2">
+                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                        <div class="bg-white p-3 border-b border-gray-400">
+                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                            <p class="text-2xl font-bold" id="df10TotalDisplay">100%</p>
+                                            <p class="text-xs text-gray-500 mt-1" id="df10Warning"></p>
+                                        </div>
+                                        <div class="bg-green-50 p-3">
+                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
 
-                <!-- Section 2: Calculated Values (Hidden for all DFs) -->
-                <div class="hidden">
-                    <span id="avgImpDisplay"></span>
-                    <span id="weightDisplay"></span>
-                </div>
+                <!-- Section 2: Calculated Values -->
+                <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
+                    <div class="p-5 bg-green-50 border border-green-200 rounded-xl shadow-sm">
+                        <p class="text-sm font-medium text-green-700">Average Importance</p>
+                        <p class="mt-1 text-3xl font-bold text-green-600" id="avgImpDisplay">
+                            {{ number_format($avgImp, 2) }}
+                        </p>
+                    </div>
 
+                    <div class="p-5 bg-purple-50 border border-purple-200 rounded-xl shadow-sm">
+                        <p class="text-sm font-medium text-purple-700">Relative Weighted Factor</p>
+                        <p class="mt-1 text-3xl font-bold text-purple-600" id="weightDisplay">
+                            {{ number_format($weight, 6) }}
+                        </p>
+                    </div>
+                </div>
 
                 <!-- Section 3: Governance Outcomes -->
                 <div class="mb-6 overflow-hidden light-card rounded-xl shadow-sm">
@@ -604,154 +643,128 @@
                             <thead>
                                 <tr>
                                     <th>Objective Code</th>
-                                    <th>Score</th>
-                                    <th>Baseline Score</th>
+                                    <th>Mapping Score</th>
+                                    <th>Mapping Baseline</th>
                                     <th>Relative Importance</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @if($type === 'DF5')
-                                    @foreach($results as $index => $result)
-                                        <tr>
-                                            <td>
-                                                <span class="px-3 py-1 text-sm font-black rounded
-                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                    @endif">
-                                                    {{ $result['code'] }}
-                                                </span>
-                                            </td>
-                                            <td class="font-bold text-gray-700 item-score-display">
-                                                {{ number_format($result['score'] / 100, 2) }}
-                                            </td>
-                                            <td class="font-bold text-gray-700 item-baseline-display">
-                                                {{ number_format($result['baseline_score'] / 100, 2) }}
-                                            </td>
-                                            <td>
-                                                <span class="relative-importance font-black text-lg
-                                                    @if($result['relative_importance'] > 0) value-positive
-                                                    @elseif($result['relative_importance'] < 0) value-negative
-                                                    @else value-neutral
-                                                    @endif"
-                                                    data-index="{{ $index }}">
-                                                    {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @else
-                                    @foreach($designFactor->items as $index => $item)
-                                        <tr>
-                                            <td>
-                                                <span
-                                                    class="px-3 py-1 text-sm font-black rounded
+                                @foreach($designFactor->items as $index => $item)
+                                    <tr>
+                                        <td>
+                                            <span
+                                                class="px-3 py-1 text-sm font-black rounded
                                                                                                                         @if(str_starts_with($item->code, 'EDM')) badge-edm
                                                                                                                         @elseif(str_starts_with($item->code, 'APO')) badge-apo
                                                                                                                         @elseif(str_starts_with($item->code, 'BAI')) badge-bai
                                                                                                                         @elseif(str_starts_with($item->code, 'DSS')) badge-dss
                                                                                                                         @elseif(str_starts_with($item->code, 'MEA')) badge-mea
                                                                                                                         @endif">
-                                                    {{ $item->code }}
-                                                </span>
-                                                <input type="hidden" name="items[{{ $index }}][code]" value="{{ $item->code }}">
-                                                <input type="hidden" name="items[{{ $index }}][score]"
-                                                    value="{{ number_format($item->score, 1, '.', '') }}" class="item-score-hidden">
-                                                <input type="hidden" name="items[{{ $index }}][baseline_score]"
-                                                    value="{{ number_format($item->baseline_score, 1, '.', '') }}" class="item-baseline-hidden">
-                                            </td>
-                                            <td class="font-bold text-gray-700 item-score-display">{{ $item->score }}
-                                            </td>
-                                            <td class="font-bold text-gray-700 item-baseline-display">
-                                                {{ $item->baseline_score }}
-                                            </td>
-                                            <td>
-                                                <span class="relative-importance font-black text-lg
+                                                {{ $item->code }}
+                                            </span>
+                                            <input type="hidden" name="items[{{ $index }}][code]" value="{{ $item->code }}">
+                                            <input type="hidden" name="items[{{ $index }}][score]"
+                                                value="{{ $item->score }}" class="item-score-hidden">
+                                            <input type="hidden" name="items[{{ $index }}][baseline_score]"
+                                                value="{{ $item->baseline_score }}" class="item-baseline-hidden">
+                                            @if($type === 'DF6' && isset($df6Mapping[$item->code]))
+                                                <input type="hidden" class="item-high-value"
+                                                    value="{{ $df6Mapping[$item->code]['high'] }}">
+                                                <input type="hidden" class="item-normal-value"
+                                                    value="{{ $df6Mapping[$item->code]['normal'] }}">
+                                                <input type="hidden" class="item-low-value"
+                                                    value="{{ $df6Mapping[$item->code]['low'] }}">
+                                            @endif
+                                            @if($type === 'DF7' && isset($df7Mapping[$item->code]))
+                                                <input type="hidden" class="item-support-value"
+                                                    value="{{ $df7Mapping[$item->code]['support'] }}">
+                                                <input type="hidden" class="item-factory-value"
+                                                    value="{{ $df7Mapping[$item->code]['factory'] }}">
+                                                <input type="hidden" class="item-turnaround-value"
+                                                    value="{{ $df7Mapping[$item->code]['turnaround'] }}">
+                                                <input type="hidden" class="item-strategic-value"
+                                                    value="{{ $df7Mapping[$item->code]['strategic'] }}">
+                                            @endif
+                                            @if($type === 'DF8' && isset($df8Mapping[$item->code]))
+                                                <input type="hidden" class="item-outsourcing-value"
+                                                    value="{{ $df8Mapping[$item->code]['outsourcing'] }}">
+                                                <input type="hidden" class="item-cloud-value"
+                                                    value="{{ $df8Mapping[$item->code]['cloud'] }}">
+                                                <input type="hidden" class="item-insourced-value"
+                                                    value="{{ $df8Mapping[$item->code]['insourced'] }}">
+                                            @endif
+                                            @if($type === 'DF9' && isset($df9Mapping[$item->code]))
+                                                <input type="hidden" class="item-agile-value"
+                                                    value="{{ $df9Mapping[$item->code]['agile'] }}">
+                                                <input type="hidden" class="item-devops-value"
+                                                    value="{{ $df9Mapping[$item->code]['devops'] }}">
+                                                <input type="hidden" class="item-traditional-value"
+                                                    value="{{ $df9Mapping[$item->code]['traditional'] }}">
+                                            @endif
+                                            @if($type === 'DF10' && isset($df10Mapping[$item->code]))
+                                                <input type="hidden" class="item-first-mover-value"
+                                                    value="{{ $df10Mapping[$item->code]['first_mover'] }}">
+                                                <input type="hidden" class="item-follower-value"
+                                                    value="{{ $df10Mapping[$item->code]['follower'] }}">
+                                                <input type="hidden" class="item-slow-adopter-value"
+                                                    value="{{ $df10Mapping[$item->code]['slow_adopter'] }}">
+                                            @endif
+                                        </td>
+                                        <td class="font-bold text-gray-700 item-score-display">{{ $item->score }}
+                                        </td>
+                                        <td class="font-bold text-gray-700 item-baseline-display">
+                                            {{ in_array($type, ['DF8', 'DF9', 'DF10']) ? number_format($item->baseline_score, 2) : $item->baseline_score }}
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="relative-importance font-black text-lg
                                                                                                                         @if($item->relative_importance > 0) value-positive
                                                                                                                         @elseif($item->relative_importance < 0) value-negative
                                                                                                                         @else value-neutral
                                                                                                                         @endif"
-                                                    data-index="{{ $index }}">
-                                                    {{ $item->relative_importance > 0 ? '+' : '' }}{{ (int) $item->relative_importance }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @endif
+                                                data-index="{{ $index }}">
+                                                {{ $item->relative_importance > 0 ? '+' : '' }}{{ (int) $item->relative_importance }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Section 4: Charts -->
-                <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
+                <div class="grid grid-cols-1 gap-6 mb-8 xl:grid-cols-2">
                     <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
                         <h3 class="mb-2 text-lg font-bold text-gray-800">{{ $type }} Output</h3>
-                        <div class="relative" style="height: {{ $type === 'DF4' ? '1000px' : '700px' }};">
+                        <div class="relative" style="height: 700px;">
                             <canvas id="barChart"></canvas>
                         </div>
                     </div>
 
                     <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
                         <h3 class="mb-2 text-lg font-bold text-gray-800">{{ $type }} Radar</h3>
-                        <div class="relative" style="height: {{ $type === 'DF4' ? '1000px' : '700px' }};">
+                        <div class="relative" style="height: 700px;">
                             <canvas id="radarChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-
                 <!-- Action Button -->
-                <div class="flex justify-center gap-4 p-6 bg-slate-50 border border-gray-200 rounded-xl shadow-inner">
-                    @if(isset($designFactor) && $designFactor->is_locked)
-                        <div class="flex items-center px-10 py-4 text-base font-bold text-gray-600 bg-gray-300 rounded-xl shadow-lg cursor-not-allowed">
-                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            Terkunci
-                        </div>
-                    @else
-                        <button type="submit"
-                            class="flex items-center px-10 py-4 text-base font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transform hover:scale-105 transition-all shadow-lg">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
-                                </path>
-                            </svg>
-                            Simpan Analisis {{ $type }}
-                        </button>
-                        
-                        <!-- Reset All Button -->
-                        <button type="button" onclick="confirmResetAll()"
-                            class="flex items-center px-10 py-4 text-base font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transform hover:scale-105 transition-all shadow-lg">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                </path>
-                            </svg>
-                            Reset Semua DF
-                        </button>
-                    @endif
+                <div class="flex justify-center p-6 bg-slate-50 border border-gray-200 rounded-xl shadow-inner">
+                    <button type="submit"
+                        class="flex items-center px-10 py-4 text-base font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transform hover:scale-105 transition-all shadow-lg">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                            </path>
+                        </svg>
+                        Simpan Analisis {{ $type }}
+                    </button>
                 </div>
             </form>
-
-            <!-- Hidden form for reset all -->
-            <form id="resetAllForm" action="{{ route('design-factors.reset-all') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
-
-            <script>
-                function confirmResetAll() {
-                    if (confirm('⚠️ PERINGATAN!\n\nApakah Anda yakin ingin mereset SEMUA Design Factor (DF1, DF2, DF3, DF4)?\n\nSemua data yang telah diisi akan dihapus dan dikembalikan ke nilai default.\n\nTindakan ini TIDAK DAPAT dibatalkan!')) {
-                        document.getElementById('resetAllForm').submit();
-                    }
-                }
-            </script>
         </div>
     </div>
-
 
     @push('scripts')
         <script>
@@ -766,15 +779,65 @@
 
                 const itemScores = [];
                 const itemBaselines = [];
+                const itemScoreHiddens = document.querySelectorAll('.item-score-hidden');
+                const itemScoreDisplays = document.querySelectorAll('.item-score-display');
                 document.querySelectorAll('.item-score-hidden').forEach(input => itemScores.push(parseFloat(input.value) || 0));
                 document.querySelectorAll('.item-baseline-hidden').forEach(input => itemBaselines.push(parseFloat(input.value) || 0));
 
-                let chartLabels = factorType === 'DF5' 
-                    ? @json(isset($results) ? $results->pluck('code') : [])
-                    : @json(isset($designFactor) && isset($designFactor->items) ? $designFactor->items->pluck('code') : []);
-                let chartData = factorType === 'DF5'
-                    ? @json(isset($results) ? $results->pluck('relative_importance') : [])
-                    : [];
+                // DF6 mapping values for dynamic score calculation
+                const df6HighValues = [];
+                const df6NormalValues = [];
+                const df6LowValues = [];
+                if (factorType === 'DF6') {
+                    document.querySelectorAll('.item-high-value').forEach(input => df6HighValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-normal-value').forEach(input => df6NormalValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-low-value').forEach(input => df6LowValues.push(parseFloat(input.value) || 1));
+                }
+
+                // DF7 mapping values for dynamic score calculation (MMULT formula)
+                const df7SupportValues = [];
+                const df7FactoryValues = [];
+                const df7TurnaroundValues = [];
+                const df7StrategicValues = [];
+                if (factorType === 'DF7') {
+                    document.querySelectorAll('.item-support-value').forEach(input => df7SupportValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-factory-value').forEach(input => df7FactoryValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-turnaround-value').forEach(input => df7TurnaroundValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-strategic-value').forEach(input => df7StrategicValues.push(parseFloat(input.value) || 1));
+                }
+
+                // DF8 mapping values for dynamic score calculation (MMULT formula)
+                const df8OutsourcingValues = [];
+                const df8CloudValues = [];
+                const df8InsourcedValues = [];
+                if (factorType === 'DF8') {
+                    document.querySelectorAll('.item-outsourcing-value').forEach(input => df8OutsourcingValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-cloud-value').forEach(input => df8CloudValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-insourced-value').forEach(input => df8InsourcedValues.push(parseFloat(input.value) || 1));
+                }
+
+                // DF9 mapping values for dynamic score calculation (MMULT formula)
+                const df9AgileValues = [];
+                const df9DevOpsValues = [];
+                const df9TraditionalValues = [];
+                if (factorType === 'DF9') {
+                    document.querySelectorAll('.item-agile-value').forEach(input => df9AgileValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-devops-value').forEach(input => df9DevOpsValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-traditional-value').forEach(input => df9TraditionalValues.push(parseFloat(input.value) || 1));
+                }
+
+                // DF10 mapping values for dynamic score calculation (MMULT formula)
+                const df10FirstMoverValues = [];
+                const df10FollowerValues = [];
+                const df10SlowAdopterValues = [];
+                if (factorType === 'DF10') {
+                    document.querySelectorAll('.item-first-mover-value').forEach(input => df10FirstMoverValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-follower-value').forEach(input => df10FollowerValues.push(parseFloat(input.value) || 1));
+                    document.querySelectorAll('.item-slow-adopter-value').forEach(input => df10SlowAdopterValues.push(parseFloat(input.value) || 1));
+                }
+
+                let chartLabels = @json($designFactor->items->pluck('code'));
+                let chartData = [];
                 let barChart, radarChart;
 
                 function updateRiskDisplays() {
@@ -799,16 +862,14 @@
                             const rating = categories[key].impact * categories[key].likelihood;
                             const dot = document.querySelector(`.risk-dot[data-key="${key}"]`);
 
-                        }
-                    } else if (factorType === 'DF5') {
-                        // Total percentage display for DF5
-                        const high = parseFloat(document.getElementById('importance_high').value) || 0;
-                        const normal = parseFloat(document.getElementById('importance_normal').value) || 0;
-                        const total = high + normal;
-                        const display = document.getElementById('totalPercentageDisplay');
-                        if (display) {
-                            display.innerText = total.toFixed(2) + '%';
-                            display.className = Math.abs(total - 100) < 0.01 ? 'text-lg text-green-600' : 'text-lg text-red-600';
+                            if (dot) {
+                                dot.className = 'w-4 h-4 rounded-full risk-dot shadow-sm';
+                                dot.style.border = '1px solid #000';
+                                if (rating >= 15) dot.style.backgroundColor = '#c00000'; // Very High
+                                else if (rating >= 8) dot.style.backgroundColor = '#edbd70'; // High
+                                else if (rating >= 4) dot.style.backgroundColor = '#72a488'; // Normal
+                                else dot.style.backgroundColor = '#4b4b4b'; // Low
+                            }
                         }
                     }
                 }
@@ -837,7 +898,7 @@
                             plugins: { legend: { display: false } },
                             scales: {
                                 x: { min: -100, max: 100, grid: { color: '#e5e7eb' }, ticks: { stepSize: 25 } },
-                                y: { grid: { display: true, borderDash: [5, 5], color: '#e5e7eb' }, ticks: { font: { weight: 'bold' }, autoSkip: false } }
+                                y: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
                             }
                         }
                     });
@@ -863,7 +924,7 @@
                             scales: {
                                 r: {
                                     min: 0, max: 200,
-                                    ticks: { stepSize: 25, callback: v => v - 100, backdropColor: 'transparent' },
+                                    ticks: { stepSize: 50, callback: v => v - 100, backdropColor: 'transparent' },
                                     pointLabels: { font: { size: 10, weight: 'bold' } }
                                 }
                             }
@@ -880,15 +941,8 @@
                     radarChart.update('none');
                 }
 
-
                 function calculate() {
                     updateRiskDisplays();
-                    
-                    if (factorType === 'DF5') {
-                        autoCalculateDF5();
-                        return;
-                    }
-
                     let totalVal = 0;
                     let totalBase = 0;
                     let count = 0;
@@ -906,30 +960,270 @@
                             count++;
                         }
                         baselineInputs.forEach(input => totalBase += parseFloat(input.value) || 9);
-                    } else {
-                        // For DF4, need to get the checked radio button value for each group
-                        if (factorType === 'DF4') {
-                            // Get all unique keys from importance inputs
-                            const keys = new Set();
-                            importanceInputs.forEach(input => {
-                                if (input.dataset.key) keys.add(input.dataset.key);
-                            });
-                            
-                            // For each key, get the checked radio button value
-                            keys.forEach(key => {
-                                const checkedRadio = document.querySelector(`.importance-input[data-key="${key}"]:checked`);
-                                if (checkedRadio) {
-                                    totalVal += parseFloat(checkedRadio.value) || 1;
-                                    count++;
-                                }
-                            });
-                        } else {
-                            // For DF1, DF2 - simple input fields
-                            importanceInputs.forEach(input => {
-                                totalVal += parseFloat(input.value) || 1;
-                                count++;
-                            });
+                    } else if (factorType === 'DF6') {
+                        // DF6: Percentage-based calculation with dynamic score
+                        const df6Inputs = document.querySelectorAll('.df6-input');
+                        let high = 0, normal = 0, low = 0;
+                        df6Inputs.forEach(input => {
+                            const key = input.dataset.key;
+                            const val = parseFloat(input.value) || 0;
+                            if (key === 'high') high = val;
+                            else if (key === 'normal') normal = val;
+                            else if (key === 'low') low = val;
+                        });
+
+                        const total = high + normal + low;
+                        const df6TotalDisplay = document.getElementById('df6TotalDisplay');
+                        const df6Warning = document.getElementById('df6Warning');
+
+                        if (df6TotalDisplay) {
+                            df6TotalDisplay.textContent = total + '%';
+                            if (total === 100) {
+                                df6TotalDisplay.className = 'text-2xl font-bold text-green-600';
+                                df6Warning.textContent = '✓ Valid';
+                                df6Warning.className = 'text-xs text-green-600 mt-1';
+                            } else {
+                                df6TotalDisplay.className = 'text-2xl font-bold text-red-600';
+                                df6Warning.textContent = '⚠ Total harus 100%';
+                                df6Warning.className = 'text-xs text-red-600 mt-1';
+                            }
                         }
+
+                        // Convert percentages to decimals for MMULT calculation
+                        const highDec = high / 100;
+                        const normalDec = normal / 100;
+                        const lowDec = low / 100;
+
+                        // Recalculate all item scores using MMULT formula: Score = (High * High%) + (Normal * Normal%) + (Low * Low%)
+                        for (let i = 0; i < df6HighValues.length; i++) {
+                            const newScore = (df6HighValues[i] * highDec) + (df6NormalValues[i] * normalDec) + (df6LowValues[i] * lowDec);
+                            itemScores[i] = newScore;
+
+                            // Update hidden input and display
+                            if (itemScoreHiddens[i]) itemScoreHiddens[i].value = newScore.toFixed(2);
+                            if (itemScoreDisplays[i]) itemScoreDisplays[i].textContent = newScore.toFixed(2);
+                        }
+
+                        // Weighted average: (High% * 5) + (Normal% * 3) + (Low% * 1) / 100
+                        totalVal = (high * 5 + normal * 3 + low * 1) / 100;
+                        count = 1;
+
+                        // Get baseline average
+                        let highBase = 0, normalBase = 100, lowBase = 0;
+                        baselineInputs.forEach(input => {
+                            const name = input.name;
+                            if (name.includes('high')) highBase = parseFloat(input.value) || 0;
+                            else if (name.includes('normal')) normalBase = parseFloat(input.value) || 100;
+                            else if (name.includes('low')) lowBase = parseFloat(input.value) || 0;
+                        });
+                        totalBase = (highBase + normalBase + lowBase) / 3;
+                    } else if (factorType === 'DF7') {
+                        // DF7: MMULT calculation = (Support * Support_imp) + (Factory * Factory_imp) + (Turnaround * Turnaround_imp) + (Strategic * Strategic_imp)
+                        let supportImp = 1, factoryImp = 1, turnaroundImp = 2, strategicImp = 5;
+                        importanceInputs.forEach(input => {
+                            const key = input.dataset.key;
+                            const val = parseFloat(input.value) || 1;
+                            if (key === 'support') supportImp = val;
+                            else if (key === 'factory') factoryImp = val;
+                            else if (key === 'turnaround') turnaroundImp = val;
+                            else if (key === 'strategic') strategicImp = val;
+                        });
+
+                        // Recalculate all item scores using MMULT formula
+                        for (let i = 0; i < df7SupportValues.length; i++) {
+                            const newScore = (df7SupportValues[i] * supportImp) +
+                                (df7FactoryValues[i] * factoryImp) +
+                                (df7TurnaroundValues[i] * turnaroundImp) +
+                                (df7StrategicValues[i] * strategicImp);
+                            itemScores[i] = newScore;
+
+                            // Update hidden input and display
+                            if (itemScoreHiddens[i]) itemScoreHiddens[i].value = newScore.toFixed(1);
+                            if (itemScoreDisplays[i]) itemScoreDisplays[i].textContent = newScore.toFixed(1);
+                        }
+
+                        // Average importance = (Support + Factory + Turnaround + Strategic) / 4
+                        totalVal = supportImp + factoryImp + turnaroundImp + strategicImp;
+                        count = 4;
+
+                        // Total baseline (always 3 for each)
+                        baselineInputs.forEach(input => totalBase += parseFloat(input.value) || 3);
+                    } else if (factorType === 'DF8') {
+                        // DF8: Percentage-based calculation with dynamic score (same pattern as DF6)
+                        const df8Inputs = document.querySelectorAll('.df8-input');
+                        let outsourcing = 0, cloud = 0, insourced = 0;
+                        df8Inputs.forEach(input => {
+                            const key = input.dataset.key;
+                            const val = parseFloat(input.value) || 0;
+                            if (key === 'outsourcing') outsourcing = val;
+                            else if (key === 'cloud') cloud = val;
+                            else if (key === 'insourced') insourced = val;
+                        });
+
+                        const total = outsourcing + cloud + insourced;
+                        const df8TotalDisplay = document.getElementById('df8TotalDisplay');
+                        const df8Warning = document.getElementById('df8Warning');
+
+                        if (df8TotalDisplay) {
+                            df8TotalDisplay.textContent = total + '%';
+                            if (total === 100) {
+                                df8TotalDisplay.className = 'text-2xl font-bold text-green-600';
+                                df8Warning.textContent = '✓ Valid';
+                                df8Warning.className = 'text-xs text-green-600 mt-1';
+                            } else {
+                                df8TotalDisplay.className = 'text-2xl font-bold text-red-600';
+                                df8Warning.textContent = '⚠ Total harus 100%';
+                                df8Warning.className = 'text-xs text-red-600 mt-1';
+                            }
+                        }
+
+                        // Convert percentages to decimals for MMULT calculation
+                        const outsourcingDec = outsourcing / 100;
+                        const cloudDec = cloud / 100;
+                        const insourcedDec = insourced / 100;
+
+                        // Recalculate all item scores using MMULT formula: Score = (Outsourcing * Outsourcing%) + (Cloud * Cloud%) + (Insourced * Insourced%)
+                        for (let i = 0; i < df8OutsourcingValues.length; i++) {
+                            const newScore = (df8OutsourcingValues[i] * outsourcingDec) + (df8CloudValues[i] * cloudDec) + (df8InsourcedValues[i] * insourcedDec);
+                            itemScores[i] = newScore;
+
+                            // Update hidden input and display
+                            if (itemScoreHiddens[i]) itemScoreHiddens[i].value = newScore.toFixed(2);
+                            if (itemScoreDisplays[i]) itemScoreDisplays[i].textContent = newScore.toFixed(2);
+                        }
+
+                        // Weighted average: (Outsourcing% * 5) + (Cloud% * 3) + (Insourced% * 1) / 100
+                        totalVal = (outsourcing * 5 + cloud * 3 + insourced * 1) / 100;
+                        count = 1;
+
+                        // Get baseline average
+                        let outsourcingBase = 33, cloudBase = 33, insourcedBase = 34;
+                        baselineInputs.forEach(input => {
+                            const name = input.name;
+                            if (name.includes('outsourcing')) outsourcingBase = parseFloat(input.value) || 33;
+                            else if (name.includes('cloud')) cloudBase = parseFloat(input.value) || 33;
+                            else if (name.includes('insourced')) insourcedBase = parseFloat(input.value) || 34;
+                        });
+                        totalBase = (outsourcingBase + cloudBase + insourcedBase) / 3;
+                    } else if (factorType === 'DF9') {
+                        // DF9: Percentage-based calculation with dynamic score (same pattern as DF6/DF8)
+                        const df9Inputs = document.querySelectorAll('.df9-input');
+                        let agile = 0, devops = 0, traditional = 0;
+                        df9Inputs.forEach(input => {
+                            const key = input.dataset.key;
+                            const val = parseFloat(input.value) || 0;
+                            if (key === 'agile') agile = val;
+                            else if (key === 'devops') devops = val;
+                            else if (key === 'traditional') traditional = val;
+                        });
+                        
+                        const total = agile + devops + traditional;
+                        const df9TotalDisplay = document.getElementById('df9TotalDisplay');
+                        const df9Warning = document.getElementById('df9Warning');
+                        
+                        if (df9TotalDisplay) {
+                            df9TotalDisplay.textContent = total + '%';
+                            if (total === 100) {
+                                df9TotalDisplay.className = 'text-2xl font-bold text-green-600';
+                                df9Warning.textContent = '✓ Valid';
+                                df9Warning.className = 'text-xs text-green-600 mt-1';
+                            } else {
+                                df9TotalDisplay.className = 'text-2xl font-bold text-red-600';
+                                df9Warning.textContent = '⚠ Total harus 100%';
+                                df9Warning.className = 'text-xs text-red-600 mt-1';
+                            }
+                        }
+                        
+                        // Convert percentages to decimals for MMULT calculation
+                        const agileDec = agile / 100;
+                        const devopsDec = devops / 100;
+                        const traditionalDec = traditional / 100;
+                        
+                        // Recalculate all item scores using MMULT formula: Score = (Agile * Agile%) + (DevOps * DevOps%) + (Traditional * Traditional%)
+                        for (let i = 0; i < df9AgileValues.length; i++) {
+                            const newScore = (df9AgileValues[i] * agileDec) + (df9DevOpsValues[i] * devopsDec) + (df9TraditionalValues[i] * traditionalDec);
+                            itemScores[i] = newScore;
+                            
+                            // Update hidden input and display
+                            if (itemScoreHiddens[i]) itemScoreHiddens[i].value = newScore.toFixed(2);
+                            if (itemScoreDisplays[i]) itemScoreDisplays[i].textContent = newScore.toFixed(2);
+                        }
+                        
+                        // Weighted average: (Agile% * 5) + (DevOps% * 3) + (Traditional% * 1) / 100
+                        totalVal = (agile * 5 + devops * 3 + traditional * 1) / 100;
+                        count = 1;
+                        
+                        // Get baseline average
+                        let agileBase = 15, devopsBase = 10, traditionalBase = 75;
+                        baselineInputs.forEach(input => {
+                            const name = input.name;
+                            if (name.includes('agile')) agileBase = parseFloat(input.value) || 15;
+                            else if (name.includes('devops')) devopsBase = parseFloat(input.value) || 10;
+                            else if (name.includes('traditional')) traditionalBase = parseFloat(input.value) || 75;
+                        });
+                        totalBase = (agileBase + devopsBase + traditionalBase) / 3;
+                    } else if (factorType === 'DF10') {
+                        // DF10: Percentage-based calculation with dynamic score (same pattern as DF9)
+                        const df10Inputs = document.querySelectorAll('.df10-input');
+                        let firstMover = 0, follower = 0, slowAdopter = 0;
+                        df10Inputs.forEach(input => {
+                            const key = input.dataset.key;
+                            const val = parseFloat(input.value) || 0;
+                            if (key === 'first_mover') firstMover = val;
+                            else if (key === 'follower') follower = val;
+                            else if (key === 'slow_adopter') slowAdopter = val;
+                        });
+                        
+                        const total = firstMover + follower + slowAdopter;
+                        const df10TotalDisplay = document.getElementById('df10TotalDisplay');
+                        const df10Warning = document.getElementById('df10Warning');
+                        
+                        if (df10TotalDisplay) {
+                            df10TotalDisplay.textContent = total + '%';
+                            if (total === 100) {
+                                df10TotalDisplay.className = 'text-2xl font-bold text-green-600';
+                                df10Warning.textContent = '✓ Valid';
+                                df10Warning.className = 'text-xs text-green-600 mt-1';
+                            } else {
+                                df10TotalDisplay.className = 'text-2xl font-bold text-red-600';
+                                df10Warning.textContent = '⚠ Total harus 100%';
+                                df10Warning.className = 'text-xs text-red-600 mt-1';
+                            }
+                        }
+                        
+                        // Convert percentages to decimals for MMULT calculation
+                        const firstMoverDec = firstMover / 100;
+                        const followerDec = follower / 100;
+                        const slowAdopterDec = slowAdopter / 100;
+                        
+                        // Recalculate all item scores using MMULT formula: Score = (FirstMover * FM%) + (Follower * F%) + (SlowAdopter * SA%)
+                        for (let i = 0; i < df10FirstMoverValues.length; i++) {
+                            const newScore = (df10FirstMoverValues[i] * firstMoverDec) + (df10FollowerValues[i] * followerDec) + (df10SlowAdopterValues[i] * slowAdopterDec);
+                            itemScores[i] = newScore;
+                            
+                            // Update hidden input and display
+                            if (itemScoreHiddens[i]) itemScoreHiddens[i].value = newScore.toFixed(2);
+                            if (itemScoreDisplays[i]) itemScoreDisplays[i].textContent = newScore.toFixed(2);
+                        }
+                        
+                        // Weighted average: (FirstMover% * 5) + (Follower% * 3) + (SlowAdopter% * 1) / 100
+                        totalVal = (firstMover * 5 + follower * 3 + slowAdopter * 1) / 100;
+                        count = 1;
+                        
+                        // Get baseline average
+                        let firstMoverBase = 15, followerBase = 70, slowAdopterBase = 15;
+                        baselineInputs.forEach(input => {
+                            const name = input.name;
+                            if (name.includes('first_mover')) firstMoverBase = parseFloat(input.value) || 15;
+                            else if (name.includes('follower')) followerBase = parseFloat(input.value) || 70;
+                            else if (name.includes('slow_adopter')) slowAdopterBase = parseFloat(input.value) || 15;
+                        });
+                        totalBase = (firstMoverBase + followerBase + slowAdopterBase) / 3;
+                    } else {
+                        importanceInputs.forEach(input => {
+                            totalVal += parseFloat(input.value) || 1;
+                            count++;
+                        });
                         // DF4 has baseline=2, others have baseline=3
                         const defaultBaseline = (factorType === 'DF4') ? 2 : 3;
                         baselineInputs.forEach(input => totalBase += parseFloat(input.value) || defaultBaseline);
@@ -940,12 +1234,21 @@
 
                     let weight = 1.0;
                     if (avgImp > 0 && avgBase > 0) {
-                        if (factorType === 'DF1' || factorType === 'DF4') {
-                            // DF1 and DF4: Baseline / Importance
+                        if (factorType === 'DF1' || factorType === 'DF4' || factorType === 'DF7') {
+                            // DF1, DF4, and DF7: Baseline / Importance
                             weight = avgBase / avgImp;
                         } else if (factorType === 'DF2' || factorType === 'DF3') {
                             // DF2, DF3: Importance / Baseline
                             weight = avgImp / avgBase;
+                        } else if (factorType === 'DF6') {
+                            // DF6: weighted importance / baseline ratio
+                            weight = avgImp / (avgBase / 100 * 3);
+                        } else if (factorType === 'DF8') {
+                            // DF8: weighted importance / baseline ratio (same as DF6)
+                            weight = avgImp / (avgBase / 100 * 3);
+                        } else if (factorType === 'DF9') {
+                            // DF9: weighted importance / baseline ratio (same as DF6/DF8)
+                            weight = avgImp / (avgBase / 100 * 3);
                         }
                     }
 
@@ -958,14 +1261,15 @@
                         const bScore = itemBaselines[index] || 0;
                         let relImp = 0;
                         if (bScore > 0) {
-                            const calculated = (weight * 100 * score) / bScore;
-
-                            if (factorType === 'DF3') {
-                                // Formula: IFERROR(MROUND(($G$28*100*B35/C35);5)-100;0)
-                                relImp = Math.round(calculated / 5) * 5 - 100;
+                            let calculated;
+                            if (factorType === 'DF6' || factorType === 'DF8' || factorType === 'DF9' || factorType === 'DF10') {
+                                // DF6, DF8, and DF9: Simple formula without weighted factor
+                                // Formula: MROUND(100*Score/Baseline, 5) - 100
+                                calculated = (100 * score) / bScore;
                             } else {
-                                relImp = Math.round(calculated / 5) * 5 - 100;
+                                calculated = (weight * 100 * score) / bScore;
                             }
+                            relImp = Math.round(calculated / 5) * 5 - 100;
                         }
                         chartData.push(relImp);
                         display.textContent = (relImp > 0 ? '+' : '') + Math.round(relImp);
@@ -975,64 +1279,73 @@
                     updateCharts();
                 }
 
+                // Validation function for max value 5
+                function validateMaxValue(input) {
+                    const val = parseInt(input.value) || 0;
+                    const maxVal = 5;
+                    const minVal = 1;
 
-                function autoCalculateDF5() {
-                    const high = parseFloat(document.getElementById('importance_high').value) || 0;
-                    const normal = parseFloat(document.getElementById('importance_normal').value) || 0;
+                    // Skip validation for DF6, DF8, DF9, and DF10 (uses percentage 0-100)
+                    if ((factorType === 'DF6' && input.classList.contains('df6-input')) ||
+                        (factorType === 'DF8' && input.classList.contains('df8-input')) ||
+                        (factorType === 'DF9' && input.classList.contains('df9-input')) ||
+                        (factorType === 'DF10' && input.classList.contains('df10-input'))) {
+                        return;
+                    }
 
-                    fetch("{{ route('design-factors.df5.calculate') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                        },
-                        body: JSON.stringify({ importance_high: high, importance_normal: normal })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.results) {
-                            const resultsArray = Object.values(data.results);
-                            chartData = [];
-                            
-                            resultsArray.forEach((result, index) => {
-                                const span = document.querySelector(`.relative-importance[data-index="${index}"]`);
-                                if (span) {
-                                    const val = Math.round(result.relative_importance);
-                                    span.innerText = (val > 0 ? '+' : '') + val;
-                                    span.className = 'relative-importance font-black text-lg ' +
-                                        (val > 0 ? 'value-positive' : (val < 0 ? 'value-negative' : 'value-neutral'));
-                                    
-                                    const row = span.closest('tr');
-                                    if (row) {
-                                        const scoreCell = row.querySelector('.item-score-display');
-                                        const baselineCell = row.querySelector('.item-baseline-display');
-                                        if (scoreCell) scoreCell.innerText = (result.score / 100).toFixed(2);
-                                        if (baselineCell) baselineCell.innerText = (result.baseline_score / 100).toFixed(2);
-                                    }
-                                }
-                                chartData.push(result.relative_importance);
-                            });
-                            updateCharts();
-                        }
-                    })
-                    .catch(error => console.error('Error calculating DF5:', error));
+                    if (val > maxVal) {
+                        input.value = maxVal;
+                        showNotification(`Nilai maksimal adalah ${maxVal}. Nilai telah diubah menjadi ${maxVal}.`, 'warning');
+                    } else if (val < minVal && val !== 0) {
+                        input.value = minVal;
+                        showNotification(`Nilai minimal adalah ${minVal}. Nilai telah diubah menjadi ${minVal}.`, 'warning');
+                    }
+                }
+
+                // Show notification function
+                function showNotification(message, type = 'info') {
+                    // Remove existing notification if any
+                    const existingNotif = document.getElementById('inputNotification');
+                    if (existingNotif) existingNotif.remove();
+
+                    const notification = document.createElement('div');
+                    notification.id = 'inputNotification';
+                    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all transform ${type === 'warning' ? 'bg-yellow-500 text-white' :
+                            type === 'error' ? 'bg-red-500 text-white' :
+                                'bg-blue-500 text-white'
+                        }`;
+                    notification.innerHTML = `
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium">${message}</span>
+                            </div>
+                        `;
+                    document.body.appendChild(notification);
+
+                    // Auto remove after 3 seconds
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                        setTimeout(() => notification.remove(), 300);
+                    }, 3000);
                 }
 
                 importanceInputs.forEach(input => {
-                    input.addEventListener('input', calculate);
-                    input.addEventListener('change', calculate);
+                    input.addEventListener('input', function () {
+                        validateMaxValue(this);
+                        calculate();
+                    });
                 });
-                df3Inputs.forEach(input => input.addEventListener('input', calculate));
-                document.querySelectorAll('.df5-input').forEach(input => input.addEventListener('input', calculate));
+                df3Inputs.forEach(input => {
+                    input.addEventListener('input', function () {
+                        validateMaxValue(this);
+                        calculate();
+                    });
+                });
 
                 initCharts();
-                if (factorType === 'DF5') {
-                    updateCharts();
-                } else {
-                    calculate();
-                }
-
-
+                calculate();
             });
         </script>
     @endpush
