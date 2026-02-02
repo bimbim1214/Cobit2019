@@ -318,6 +318,8 @@
                                 Risk Scenario Categories
                             @elseif($type === 'DF4')
                                 IT-Related Issues
+                            @elseif($type === 'DF5')
+                                Governance/Management Objectives
                             @elseif($type === 'DF6')
                                 Threat Landscape
                             @elseif($type === 'DF7')
@@ -332,286 +334,300 @@
                         </h2>
                     </div>
                     <div class="p-4 bg-white">
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                            <!-- Table container -->
-                            <div class="lg:col-span-9 xl:col-span-10 overflow-x-auto min-w-0">
-                                <table
-                                    class="{{ in_array($type, ['DF1', 'DF2', 'DF6', 'DF7', 'DF8', 'DF10']) ? 'strategic-table' : 'clean-table' }}">
+                        @if($type === 'DF5')
+                            <div class="w-full overflow-x-auto">
+                                <table class="strategic-table">
                                     <thead>
                                         <tr>
-                                            @if($type === 'DF3')
-                                                <th style="min-width: 400px;">Risk Scenario Category</th>
-                                                <th style="min-width: 100px;">Impact<br>(1-5)</th>
-                                                <th style="min-width: 100px;">Likelihood<br>(1-5)</th>
-                                                <th style="min-width: 100px;">Risk Rating</th>
-                                            @elseif($type === 'DF4')
-                                                <th style="min-width: 500px;">IT-Related Issue</th>
-                                                <th style="min-width: 150px;">Importance</th>
-                                            @elseif($type === 'DF6')
-                                                <th style="min-width: 200px;">Value</th>
-                                                <th style="min-width: 200px;">Importance (100%)</th>
-                                            @elseif($type === 'DF8')
-                                                <th style="min-width: 200px;">Value</th>
-                                                <th style="min-width: 200px;">Importance (100%)</th>
-                                            @elseif($type === 'DF9')
-                                                <th style="min-width: 200px;">Value</th>
-                                                <th style="min-width: 200px;">Importance (100%)</th>
-                                            @elseif($type === 'DF10')
-                                                <th style="min-width: 200px;">Value</th>
-                                                <th style="min-width: 200px;">Importance (100%)</th></th>
-                                            @else
-                                                <th style="min-width: 350px;">Value</th>
-                                                <th style="min-width: 150px;">Importance (1-5)</th>
-                                            @endif
-                                            <th style="min-width: 100px;">Baseline</th>
+                                            <th style="min-width: 350px;">Governance/Management Objectives</th>
+                                            <th style="min-width: 150px;">Importance (%)</th>
+                                            <th style="min-width: 150px;">Baseline (%)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($metadata as $key => $data)
-                                            <tr>
-                                                <td class="font-medium text-gray-700">{{ $data['name'] }}</td>
-
-                                                @if($type === 'DF3')
-                                                    <td class="p-0">
-                                                        <input type="number" name="inputs[{{ $key }}][impact]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.impact', 3) }}"
-                                                            min="1" max="5" class="heat-input df3-input impact-input"
-                                                            data-key="{{ $key }}">
-                                                    </td>
-                                                    <td class="p-0">
-                                                        <input type="number" name="inputs[{{ $key }}][likelihood]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.likelihood', 3) }}"
-                                                            min="1" max="5" class="heat-input df3-input likelihood-input"
-                                                            data-key="{{ $key }}">
-                                                    </td>
-                                                    <td class="bg-white p-0">
-                                                        <div class="flex items-center justify-center p-2">
-                                                            <div class="w-4 h-4 rounded-full risk-dot shadow-sm"
-                                                                data-key="{{ $key }}"></div>
-                                                        </div>
-                                                    </td>
-                                                @elseif($type === 'DF4')
-                                                    <td class="df4-importance-cell">
-                                                        <div class="flex justify-center gap-3">
-                                                            @php
-                                                                $currentImportance = data_get($designFactor->inputs, $key . '.importance', 1);
-                                                            @endphp
-                                                            <label class="flex flex-col items-center cursor-pointer">
-                                                                <input type="radio" name="inputs[{{ $key }}][importance]"
-                                                                    value="1"
-                                                                    class="importance-icon-radio green importance-input"
-                                                                    data-key="{{ $key }}" {{ $currentImportance == 1 ? 'checked' : '' }}>
-                                                            </label>
-                                                            <label class="flex flex-col items-center cursor-pointer">
-                                                                <input type="radio" name="inputs[{{ $key }}][importance]"
-                                                                    value="2"
-                                                                    class="importance-icon-radio yellow importance-input"
-                                                                    data-key="{{ $key }}" {{ $currentImportance == 2 ? 'checked' : '' }}>
-                                                            </label>
-                                                            <label class="flex flex-col items-center cursor-pointer">
-                                                                <input type="radio" name="inputs[{{ $key }}][importance]"
-                                                                    value="3" class="importance-icon-radio red importance-input"
-                                                                    data-key="{{ $key }}" {{ $currentImportance == 3 ? 'checked' : '' }}>
-                                                            </label>
-                                                        </div>
-                                                    </td>
-                                                @elseif($type === 'DF6')
-                                                    <td class="importance-cell">
-                                                        <div class="flex items-center justify-center gap-1">
-                                                            <input type="number" name="inputs[{{ $key }}][importance]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'high' ? 25 : ($key === 'normal' ? 75 : 0))) }}"
-                                                                min="0" max="100"
-                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df6-input"
-                                                                data-key="{{ $key }}">
-                                                            <span class="font-bold text-gray-600">%</span>
-                                                        </div>
-                                                    </td>
-                                                @elseif($type === 'DF8')
-                                                    <td class="importance-cell">
-                                                        <div class="flex items-center justify-center gap-1">
-                                                            <input type="number" name="inputs[{{ $key }}][importance]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'outsourcing' ? 10 : ($key === 'cloud' ? 50 : 40))) }}"
-                                                                min="0" max="100"
-                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df8-input"
-                                                                data-key="{{ $key }}">
-                                                            <span class="font-bold text-gray-600">%</span>
-                                                        </div>
-                                                    </td>
-                                                @elseif($type === 'DF9')
-                                                    <td class="importance-cell">
-                                                        <div class="flex items-center justify-center gap-1">
-                                                            <input type="number" name="inputs[{{ $key }}][importance]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'agile' ? 50 : ($key === 'devops' ? 10 : 40))) }}"
-                                                                min="0" max="100"
-                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df9-input"
-                                                                data-key="{{ $key }}">
-                                                            <span class="font-bold text-gray-600">%</span>
-                                                        </div>
-                                                    </td>
-                                                @elseif($type === 'DF10')
-                                                    <td class="importance-cell">
-                                                        <div class="flex items-center justify-center gap-1">
-                                                            <input type="number" name="inputs[{{ $key }}][importance]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', ($key === 'first_mover' ? 75 : ($key === 'follower' ? 15 : 10))) }}"
-                                                                min="0" max="100"
-                                                                class="w-20 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input df10-input"
-                                                                data-key="{{ $key }}">
-                                                            <span class="font-bold text-gray-600">%</span>
-                                                        </div>
-                                                    </td>
-                                                @else
-                                                    <td class="importance-cell">
-                                                        <input type="number" name="inputs[{{ $key }}][importance]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
-                                                            min="1" max="5"
-                                                            class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
-                                                            data-key="{{ $key }}">
-                                                    </td>
-                                                @endif
-
-                                                <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
-                                                    @php
-                                                        $baselineDefault = 3;
-                                                        if ($type === 'DF3') {
-                                                            $baselineDefault = 9;
-                                                        } elseif ($type === 'DF4') {
-                                                            $baselineDefault = 2;
-                                                        } elseif ($type === 'DF6') {
-                                                            $baselineDefault = $key === 'normal' ? 100 : 0;
-                                                        } elseif ($type === 'DF8') {
-                                                            $baselineDefault = $key === 'insourced' ? 34 : 33;
-                                                        } elseif ($type === 'DF9') {
-                                                            $baselineDefault = $key === 'agile' ? 15 : ($key === 'devops' ? 10 : 75);
-                                                        } elseif ($type === 'DF10') {
-                                                            $baselineDefault = $key === 'first_mover' ? 15 : ($key === 'follower' ? 70 : 15);
-                                                        }
-                                                    @endphp
-                                                    {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}{{ in_array($type, ['DF6', 'DF8', 'DF9', 'DF10']) ? '%' : '' }}
-                                                    <input type="hidden" name="inputs[{{ $key }}][baseline]"
-                                                        value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
-                                                        class="baseline-input">
-                                                </td>
-                                            </tr>
-                                        @endforeach
+                                        <tr>
+                                            <td>Set of Governance and Management Objectives (High)</td>
+                                            <td class="importance-cell">
+                                                <input type="number" name="importance_high" id="importance_high"
+                                                    value="{{ $df5->importance_high ?? 50 }}" min="0" max="100"
+                                                    step="0.01"
+                                                    class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df5-input"
+                                                    {{ (isset($df5) && method_exists($df5, 'is_locked') && $df5->is_locked) ? 'disabled readonly' : '' }}>
+                                            </td>
+                                            <td class="baseline-col text-center font-bold">33%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Set of Governance and Management Objectives (Normal)</td>
+                                            <td class="importance-cell">
+                                                <input type="number" name="importance_normal" id="importance_normal"
+                                                    value="{{ $df5->importance_normal ?? 50 }}" min="0" max="100"
+                                                    step="0.01"
+                                                    class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df5-input"
+                                                    {{ (isset($df5) && method_exists($df5, 'is_locked') && $df5->is_locked) ? 'disabled readonly' : '' }}>
+                                            </td>
+                                            <td class="baseline-col text-center font-bold">67%</td>
+                                        </tr>
                                     </tbody>
+                                    <tfoot>
+                                        <tr class="bg-gray-100 font-bold">
+                                            <td class="text-right pr-4">Total Importance:</td>
+                                            <td class="text-center">
+                                                <span id="totalPercentageDisplay" class="text-lg">100%</span>
+                                            </td>
+                                            <td class="text-center">100%</td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
+                            <!-- Smart Message Box -->
+                            <div id="smartMessageBoxMain" class="mb-4 p-3 rounded-lg border hidden">
+                                <div class="flex items-center">
+                                    <div id="smartMessageIconMain" class="mr-3"></div>
+                                    <div id="smartMessageContentMain" class="text-sm font-medium"></div>
+                                </div>
+                            </div>
+                        @else
+                                <!-- Table container -->
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                    <div class="lg:col-span-9 xl:col-span-10 overflow-x-auto min-w-0">
+                                        <table
+                                            class="{{ in_array($type, ['DF1', 'DF2', 'DF6', 'DF7', 'DF8', 'DF10']) ? 'strategic-table' : 'clean-table' }}">
+                                            <thead>
+                                                <tr>
+                                                    @if($type === 'DF3')
+                                                        <th style="min-width: 400px;">Risk Scenario Category</th>
+                                                        <th style="min-width: 100px;">Impact<br>(1-5)</th>
+                                                        <th style="min-width: 100px;">Likelihood<br>(1-5)</th>
+                                                        <th style="min-width: 100px;">Risk Rating</th>
+                                                    @elseif($type === 'DF4')
+                                                        <th style="min-width: 500px;">IT-Related Issue</th>
+                                                        <th style="min-width: 150px;">Importance</th>
+                                                    @elseif($type === 'DF6')
+                                                        <th style="min-width: 200px;">Value</th>
+                                                        <th style="min-width: 200px;">Importance (100%)</th>
+                                                    @elseif($type === 'DF8')
+                                                        <th style="min-width: 200px;">Value</th>
+                                                        <th style="min-width: 200px;">Importance (100%)</th>
+                                                    @elseif($type === 'DF9')
+                                                        <th style="min-width: 200px;">Value</th>
+                                                        <th style="min-width: 200px;">Importance (100%)</th>
+                                                    @elseif($type === 'DF10')
+                                                        <th style="min-width: 200px;">Value</th>
+                                                        <th style="min-width: 200px;">Importance (100%)</th>
+                                                    @else
+                                                        <th style="min-width: 350px;">Value</th>
+                                                        <th style="min-width: 150px;">Importance (1-5)</th>
+                                                    @endif
+                                                    <th style="min-width: 100px;">Baseline</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($metadata as $key => $data)
+                                                    <tr>
+                                                        <td class="font-medium text-gray-700">{{ $data['name'] }}</td>
 
-                            @if($type === 'DF3')
-                                <!-- Legend container -->
-                                <div class="w-full lg:col-span-3 xl:col-span-2">
-                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                        <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                            <div class="w-4 h-4 rounded-full"
-                                                style="background-color: #c00000; border: 1px solid #000;"></div>
-                                            <span class="text-xs font-bold text-gray-800">Very High Risk</span>
-                                        </div>
-                                        <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                            <div class="w-4 h-4 rounded-full"
-                                                style="background-color: #edbd70; border: 1px solid #000;"></div>
-                                            <span class="text-xs font-bold text-gray-800">High Risk</span>
-                                        </div>
-                                        <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                            <div class="w-4 h-4 rounded-full"
-                                                style="background-color: #72a488; border: 1px solid #000;"></div>
-                                            <span class="text-xs font-bold text-gray-800">Normal Risk</span>
-                                        </div>
-                                        <div class="bg-white p-2 flex items-center gap-3">
-                                            <div class="w-4 h-4 rounded-full"
-                                                style="background-color: #4b4b4b; border: 1px solid #000;"></div>
-                                            <span class="text-xs font-bold text-gray-800">Low Risk</span>
+                                                        @if($type === 'DF3')
+                                                            <td class="p-0">
+                                                                <input type="number" name="inputs[{{ $key }}][impact]"
+                                                                    value="{{ data_get($designFactor->inputs, $key . '.impact', 3) }}"
+                                                                    min="1" max="5" class="heat-input df3-input impact-input"
+                                                                    data-key="{{ $key }}"
+                                                                    {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                            </td>
+                                                            <td class="p-0">
+                                                                <input type="number" name="inputs[{{ $key }}][likelihood]"
+                                                                    value="{{ data_get($designFactor->inputs, $key . '.likelihood', 3) }}"
+                                                                    min="1" max="5" class="heat-input df3-input likelihood-input"
+                                                                    data-key="{{ $key }}"
+                                                                    {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                            </td>
+                                                            <td class="bg-white p-0">
+                                                                <div class="flex items-center justify-center p-2">
+                                                                    <div class="w-4 h-4 rounded-full risk-dot shadow-sm"
+                                                                        data-key="{{ $key }}"></div>
+                                                                </div>
+                                                            </td>
+                                                        @elseif($type === 'DF4')
+                                                            <td class="df4-importance-cell">
+                                                                <div class="flex justify-center gap-3">
+                                                                    @php
+                                                                        $currentImportance = data_get($designFactor->inputs, $key . '.importance', 1);
+                                                                    @endphp
+                                                                    <label class="flex flex-col items-center cursor-pointer">
+                                                                        <input type="radio" 
+                                                                            name="inputs[{{ $key }}][importance]" 
+                                                                            value="1"
+                                                                            class="importance-icon-radio green importance-input"
+                                                                            data-key="{{ $key }}"
+                                                                            {{ $currentImportance == 1 ? 'checked' : '' }}
+                                                                            {{ $designFactor->is_locked ? 'disabled' : '' }}>
+                                                                    </label>
+                                                                    <label class="flex flex-col items-center cursor-pointer">
+                                                                        <input type="radio" 
+                                                                            name="inputs[{{ $key }}][importance]" 
+                                                                            value="2"
+                                                                            class="importance-icon-radio yellow importance-input"
+                                                                            data-key="{{ $key }}"
+                                                                            {{ $currentImportance == 2 ? 'checked' : '' }}
+                                                                            {{ $designFactor->is_locked ? 'disabled' : '' }}>
+                                                                    </label>
+                                                                    <label class="flex flex-col items-center cursor-pointer">
+                                                                        <input type="radio" 
+                                                                            name="inputs[{{ $key }}][importance]" 
+                                                                            value="3"
+                                                                            class="importance-icon-radio red importance-input"
+                                                                            data-key="{{ $key }}"
+                                                                            {{ $currentImportance == 3 ? 'checked' : '' }}
+                                                                            {{ $designFactor->is_locked ? 'disabled' : '' }}>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                        @else
+                                                            <td class="importance-cell">
+                                                                <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                    value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
+                                                                    min="1" max="5"
+                                                                    class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
+                                                                    data-key="{{ $key }}"
+                                                                    {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                            </td>
+                                                        @endif
+
+                                                        <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
+                                                            @php
+                                                                $baselineDefault = 3;
+                                                                if ($type === 'DF3') {
+                                                                    $baselineDefault = 9;
+                                                                } elseif ($type === 'DF4') {
+                                                                    $baselineDefault = 2;
+                                                                }
+                                                            @endphp
+                                                            {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
+                                                            <input type="hidden" name="inputs[{{ $key }}][baseline]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
+                                                                class="baseline-input">
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @if($type === 'DF3')
+                                    <!-- Legend container -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #c00000; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">Very High Risk</span>
+                                            </div>
+                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #edbd70; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">High Risk</span>
+                                            </div>
+                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #72a488; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">Normal Risk</span>
+                                            </div>
+                                            <div class="bg-white p-2 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #4b4b4b; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">Low Risk</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            @if($type === 'DF4')
-                                <!-- Legend container for DF4 -->
-                                <div class="w-full lg:col-span-3 xl:col-span-2">
-                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                        <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
-                                            <div class="w-5 h-5 rounded-full"
-                                                style="background-color: #70ad47; border: 2px solid #000;"></div>
-                                            <span class="text-sm font-bold text-gray-800">No Issue</span>
-                                        </div>
-                                        <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
-                                            <div class="w-5 h-5 rounded-full"
-                                                style="background-color: #ffc000; border: 2px solid #000;"></div>
-                                            <span class="text-sm font-bold text-gray-800">Issue</span>
-                                        </div>
-                                        <div class="bg-white p-3 flex items-center gap-3">
-                                            <div class="w-5 h-5 rounded-full"
-                                                style="background-color: #c00000; border: 2px solid #000;"></div>
-                                            <span class="text-sm font-bold text-gray-800">Serious Issue</span>
+                                @if($type === 'DF4')
+                                    <!-- Legend container for DF4 -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-5 h-5 rounded-full"
+                                                    style="background-color: #70ad47; border: 2px solid #000;"></div>
+                                                <span class="text-sm font-bold text-gray-800">No Issue</span>
+                                            </div>
+                                            <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-5 h-5 rounded-full"
+                                                    style="background-color: #ffc000; border: 2px solid #000;"></div>
+                                                <span class="text-sm font-bold text-gray-800">Issue</span>
+                                            </div>
+                                            <div class="bg-white p-3 flex items-center gap-3">
+                                                <div class="w-5 h-5 rounded-full"
+                                                    style="background-color: #c00000; border: 2px solid #000;"></div>
+                                                <span class="text-sm font-bold text-gray-800">Serious Issue</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            @if($type === 'DF6')
-                                <!-- DF6 Total Display and Legend -->
-                                <div class="w-full lg:col-span-3 xl:col-span-2">
-                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                        <div class="bg-white p-3 border-b border-gray-400">
-                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
-                                            <p class="text-2xl font-bold" id="df6TotalDisplay">100%</p>
-                                            <p class="text-xs text-gray-500 mt-1" id="df6Warning"></p>
-                                        </div>
-                                        <div class="bg-green-50 p-3">
-                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                @if($type === 'DF6')
+                                    <!-- DF6 Total Display and Legend -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-3 border-b border-gray-400">
+                                                <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                                <p class="text-2xl font-bold" id="df6TotalDisplay">100%</p>
+                                                <p class="text-xs text-gray-500 mt-1" id="df6Warning"></p>
+                                            </div>
+                                            <div class="bg-green-50 p-3">
+                                                <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            @if($type === 'DF8')
-                                <!-- DF8 Total Display and Legend -->
-                                <div class="w-full lg:col-span-3 xl:col-span-2">
-                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                        <div class="bg-white p-3 border-b border-gray-400">
-                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
-                                            <p class="text-2xl font-bold" id="df8TotalDisplay">100%</p>
-                                            <p class="text-xs text-gray-500 mt-1" id="df8Warning"></p>
-                                        </div>
-                                        <div class="bg-green-50 p-3">
-                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                @if($type === 'DF8')
+                                    <!-- DF8 Total Display and Legend -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-3 border-b border-gray-400">
+                                                <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                                <p class="text-2xl font-bold" id="df8TotalDisplay">100%</p>
+                                                <p class="text-xs text-gray-500 mt-1" id="df8Warning"></p>
+                                            </div>
+                                            <div class="bg-green-50 p-3">
+                                                <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            @if($type === 'DF9')
-                                <!-- DF9 Total Display and Legend -->
-                                <div class="w-full lg:col-span-3 xl:col-span-2">
-                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                        <div class="bg-white p-3 border-b border-gray-400">
-                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
-                                            <p class="text-2xl font-bold" id="df9TotalDisplay">100%</p>
-                                            <p class="text-xs text-gray-500 mt-1" id="df9Warning"></p>
-                                        </div>
-                                        <div class="bg-green-50 p-3">
-                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                @if($type === 'DF9')
+                                    <!-- DF9 Total Display and Legend -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-3 border-b border-gray-400">
+                                                <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                                <p class="text-2xl font-bold" id="df9TotalDisplay">100%</p>
+                                                <p class="text-xs text-gray-500 mt-1" id="df9Warning"></p>
+                                            </div>
+                                            <div class="bg-green-50 p-3">
+                                                <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            @if($type === 'DF10')
-                                <!-- DF10 Total Display and Legend -->
-                                <div class="w-full lg:col-span-3 xl:col-span-2">
-                                    <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                        <div class="bg-white p-3 border-b border-gray-400">
-                                            <p class="text-sm font-bold text-gray-800">Total Importance</p>
-                                            <p class="text-2xl font-bold" id="df10TotalDisplay">100%</p>
-                                            <p class="text-xs text-gray-500 mt-1" id="df10Warning"></p>
-                                        </div>
-                                        <div class="bg-green-50 p-3">
-                                            <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                @if($type === 'DF10')
+                                    <!-- DF10 Total Display and Legend -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-3 border-b border-gray-400">
+                                                <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                                <p class="text-2xl font-bold" id="df10TotalDisplay">100%</p>
+                                                <p class="text-xs text-gray-500 mt-1" id="df10Warning"></p>
+                                            </div>
+                                            <div class="bg-green-50 p-3">
+                                                <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
-                        </div>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -751,16 +767,36 @@
                 </div>
 
                 <!-- Action Button -->
-                <div class="flex justify-center p-6 bg-slate-50 border border-gray-200 rounded-xl shadow-inner">
-                    <button type="submit"
-                        class="flex items-center px-10 py-4 text-base font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transform hover:scale-105 transition-all shadow-lg">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
-                            </path>
-                        </svg>
-                        Simpan Analisis {{ $type }}
-                    </button>
+                <div class="flex justify-center gap-4 p-6 bg-slate-50 border border-gray-200 rounded-xl shadow-inner">
+                    @if(isset($designFactor) && $designFactor->is_locked)
+                        <div class="flex items-center px-10 py-4 text-base font-bold text-gray-600 bg-gray-300 rounded-xl shadow-lg cursor-not-allowed">
+                            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Terkunci
+                        </div>
+                    @else
+                        <button type="submit" id="saveBtnMain"
+                            class="flex items-center px-10 py-4 text-base font-bold text-white bg-green-600 rounded-xl hover:bg-green-700 transform hover:scale-105 transition-all shadow-lg">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                                </path>
+                            </svg>
+                            Simpan Analisis {{ $type }}
+                        </button>
+
+                        <!-- Reset All Button -->
+                        <button type="button" onclick="confirmResetAll()"
+                            class="flex items-center px-10 py-4 text-base font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transform hover:scale-105 transition-all shadow-lg">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                </path>
+                            </svg>
+                            Reset Semua DF
+                        </button>
+                    @endif
                 </div>
             </form>
         </div>
@@ -869,6 +905,62 @@
                                 else if (rating >= 8) dot.style.backgroundColor = '#edbd70'; // High
                                 else if (rating >= 4) dot.style.backgroundColor = '#72a488'; // Normal
                                 else dot.style.backgroundColor = '#4b4b4b'; // Low
+                            }
+                        }
+                    } else if (factorType === 'DF5') {
+                        // Total percentage display for DF5
+                        const high = parseFloat(document.getElementById('importance_high').value) || 0;
+                        const normal = parseFloat(document.getElementById('importance_normal').value) || 0;
+                        const total = high + normal;
+                        const display = document.getElementById('totalPercentageDisplay');
+                        const saveBtn = document.getElementById('saveBtnMain');
+
+                        // Smart Message Logic
+                        const smartBox = document.getElementById('smartMessageBoxMain');
+                        const smartIcon = document.getElementById('smartMessageIconMain');
+                        const smartContent = document.getElementById('smartMessageContentMain');
+
+                        if (smartBox) {
+                            smartBox.classList.remove('hidden');
+                            if (Math.abs(total - 100) < 0.01) {
+                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
+                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                                smartContent.innerText = 'Total sudah tepat 100%. Data siap disimpan.';
+                            } else if (total > 100) {
+                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                                smartContent.innerText = `Total (${total.toFixed(2)}%) melebihi 100%! Mohon kurangi nilai agar pas 100%.`;
+                            } else {
+                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800';
+                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';
+
+                                // Determine suggestion based on which field was likely changed
+                                // In the main index view, we can just use a generic suggestion or check activeElement
+                                const activeEl = document.activeElement;
+                                if (activeEl && activeEl.id === 'importance_high') {
+                                    smartContent.innerText = `Saran: Jika 'High' diisi ${high}%, maka isi 'Normal' dengan ${(100 - high).toFixed(2)}% agar total 100%.`;
+                                } else if (activeEl && activeEl.id === 'importance_normal') {
+                                    smartContent.innerText = `Saran: Jika 'Normal' diisi ${normal}%, maka isi 'High' dengan ${(100 - normal).toFixed(2)}% agar total 100%.`;
+                                } else {
+                                    smartContent.innerText = `Saran: Isi nilai hingga total mencapai 100%. (Sisa: ${(100 - total).toFixed(2)}%)`;
+                                }
+                            }
+                        }
+
+                        if (display) {
+                            display.innerText = total.toFixed(2) + '%';
+                            if (Math.abs(total - 100) < 0.01) {
+                                display.className = 'text-lg text-green-600 font-bold';
+                                if (saveBtn) {
+                                    saveBtn.disabled = false;
+                                    saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                }
+                            } else {
+                                display.className = 'text-lg text-red-600 font-bold';
+                                if (saveBtn) {
+                                    saveBtn.disabled = true;
+                                    saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                                }
                             }
                         }
                     }
@@ -1116,11 +1208,11 @@
                             else if (key === 'devops') devops = val;
                             else if (key === 'traditional') traditional = val;
                         });
-                        
+
                         const total = agile + devops + traditional;
                         const df9TotalDisplay = document.getElementById('df9TotalDisplay');
                         const df9Warning = document.getElementById('df9Warning');
-                        
+
                         if (df9TotalDisplay) {
                             df9TotalDisplay.textContent = total + '%';
                             if (total === 100) {
@@ -1133,26 +1225,26 @@
                                 df9Warning.className = 'text-xs text-red-600 mt-1';
                             }
                         }
-                        
+
                         // Convert percentages to decimals for MMULT calculation
                         const agileDec = agile / 100;
                         const devopsDec = devops / 100;
                         const traditionalDec = traditional / 100;
-                        
+
                         // Recalculate all item scores using MMULT formula: Score = (Agile * Agile%) + (DevOps * DevOps%) + (Traditional * Traditional%)
                         for (let i = 0; i < df9AgileValues.length; i++) {
                             const newScore = (df9AgileValues[i] * agileDec) + (df9DevOpsValues[i] * devopsDec) + (df9TraditionalValues[i] * traditionalDec);
                             itemScores[i] = newScore;
-                            
+
                             // Update hidden input and display
                             if (itemScoreHiddens[i]) itemScoreHiddens[i].value = newScore.toFixed(2);
                             if (itemScoreDisplays[i]) itemScoreDisplays[i].textContent = newScore.toFixed(2);
                         }
-                        
+
                         // Weighted average: (Agile% * 5) + (DevOps% * 3) + (Traditional% * 1) / 100
                         totalVal = (agile * 5 + devops * 3 + traditional * 1) / 100;
                         count = 1;
-                        
+
                         // Get baseline average
                         let agileBase = 15, devopsBase = 10, traditionalBase = 75;
                         baselineInputs.forEach(input => {
@@ -1173,11 +1265,11 @@
                             else if (key === 'follower') follower = val;
                             else if (key === 'slow_adopter') slowAdopter = val;
                         });
-                        
+
                         const total = firstMover + follower + slowAdopter;
                         const df10TotalDisplay = document.getElementById('df10TotalDisplay');
                         const df10Warning = document.getElementById('df10Warning');
-                        
+
                         if (df10TotalDisplay) {
                             df10TotalDisplay.textContent = total + '%';
                             if (total === 100) {
@@ -1190,26 +1282,26 @@
                                 df10Warning.className = 'text-xs text-red-600 mt-1';
                             }
                         }
-                        
+
                         // Convert percentages to decimals for MMULT calculation
                         const firstMoverDec = firstMover / 100;
                         const followerDec = follower / 100;
                         const slowAdopterDec = slowAdopter / 100;
-                        
+
                         // Recalculate all item scores using MMULT formula: Score = (FirstMover * FM%) + (Follower * F%) + (SlowAdopter * SA%)
                         for (let i = 0; i < df10FirstMoverValues.length; i++) {
                             const newScore = (df10FirstMoverValues[i] * firstMoverDec) + (df10FollowerValues[i] * followerDec) + (df10SlowAdopterValues[i] * slowAdopterDec);
                             itemScores[i] = newScore;
-                            
+
                             // Update hidden input and display
                             if (itemScoreHiddens[i]) itemScoreHiddens[i].value = newScore.toFixed(2);
                             if (itemScoreDisplays[i]) itemScoreDisplays[i].textContent = newScore.toFixed(2);
                         }
-                        
+
                         // Weighted average: (FirstMover% * 5) + (Follower% * 3) + (SlowAdopter% * 1) / 100
                         totalVal = (firstMover * 5 + follower * 3 + slowAdopter * 1) / 100;
                         count = 1;
-                        
+
                         // Get baseline average
                         let firstMoverBase = 15, followerBase = 70, slowAdopterBase = 15;
                         baselineInputs.forEach(input => {
