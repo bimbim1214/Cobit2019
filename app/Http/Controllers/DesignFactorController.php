@@ -169,9 +169,108 @@ class DesignFactorController extends Controller
             $df7Mapping = [];
             $df8Mapping = \App\Models\DesignFactor::getDF8Mapping();
             $df9Mapping = \App\Models\DesignFactor::getDF9Mapping();
+            $df8Mapping = \App\Models\DesignFactor::getDF8Mapping();
+            $df9Mapping = \App\Models\DesignFactor::getDF9Mapping();
             $df10Mapping = \App\Models\DesignFactor::getDF10Mapping();
 
             return view('design-factors.index', compact('df8', 'results', 'factorInfo', 'progress', 'type', 'designFactor', 'avgImp', 'weight', 'metadata', 'df4Mapping', 'df5', 'df7Mapping', 'df8Mapping', 'df9Mapping', 'df10Mapping'));
+        }
+
+        // Specific handling for DF10
+        if ($type === 'DF10') {
+            // Get DF10 mapping data
+            $df10MapData = \App\Models\Df10Map::orderBy('objective_code')->get();
+
+            // Get existing or create new DF10
+            $designFactor = DesignFactor::where('user_id', $user->id)
+                ->where('factor_type', 'DF10')
+                ->first();
+
+            if (!$designFactor) {
+                $designFactor = new DesignFactor(['factor_type' => 'DF10']);
+                $designFactor->inputs = DesignFactor::getDefaultInputs('DF10');
+            }
+            $designFactor->factor_type = 'DF10';
+
+            // Get inputs
+            $inputs = $designFactor->inputs ?? DesignFactor::getDefaultInputs('DF10');
+            $importanceFirstMover = floatval($inputs['first_mover']['importance'] ?? 75.00);
+            $importanceFollower = floatval($inputs['follower']['importance'] ?? 15.00);
+            $importanceSlowAdopter = floatval($inputs['slow_adopter']['importance'] ?? 10.00);
+
+            // Fixed weights for Baseline Score calculation (User Specified: 15/70/15)
+            $baselineFirstMover = 15.00;
+            $baselineFollower = 70.00;
+            $baselineSlowAdopter = 15.00;
+
+            // Calculate scores
+            $scores = [];
+            $baselineScores = [];
+            $relativeImportance = [];
+
+            foreach ($df10MapData as $map) {
+                $code = $map->objective_code;
+
+                // Score = (FirstMover * FirstMover%) + (Follower * Follower%) + (SlowAdopter * SlowAdopter%)
+                $score = ($map->first_mover * $importanceFirstMover / 100) +
+                    ($map->follower * $importanceFollower / 100) +
+                    ($map->slow_adopter * $importanceSlowAdopter / 100);
+
+                // Baseline Score = (FirstMover * 15%) + (Follower * 70%) + (SlowAdopter * 15%)
+                $baselineScore = ($map->first_mover * $baselineFirstMover / 100) +
+                    ($map->follower * $baselineFollower / 100) +
+                    ($map->slow_adopter * $baselineSlowAdopter / 100);
+
+                $scores[$code] = $score;
+                $baselineScores[$code] = $baselineScore;
+
+                // Calculate relative importance
+                $calculated = ($baselineScore > 0) ? (100 * $score) / $baselineScore : 0;
+                $relativeImportance[$code] = (round($calculated / 5) * 5) - 100;
+            }
+
+            $results = [];
+            foreach ($df10MapData as $map) {
+                $code = $map->objective_code;
+                $results[] = [
+                    'code' => $code,
+                    'name' => $map->objective_name ?? '', // Add name if available, or fetch from elsewhere if needed. Assuming DF10 map doesn't have name col, might need helper
+                    'score' => $scores[$code] ?? 0,
+                    'baseline_score' => $baselineScores[$code] ?? 0,
+                    'relative_importance' => $relativeImportance[$code] ?? 0,
+                ];
+            }
+            // Add Name helper if needed - DF10 map table didn't have name column in migration, only code. 
+            // We can use getObjectiveName from controller or model.
+            // Let's refine the loop above to use getObjectiveName()
+
+            $results = [];
+            foreach ($df10MapData as $map) {
+                $code = $map->objective_code;
+                $results[] = [
+                    'code' => $code,
+                    'name' => $this->getObjectiveName($code),
+                    'score' => $scores[$code] ?? 0,
+                    'baseline_score' => $baselineScores[$code] ?? 0,
+                    'relative_importance' => $relativeImportance[$code] ?? 0,
+                ];
+            }
+
+
+            $factorInfo = DesignFactor::getFactorInfo('DF10');
+            $progress = DesignFactor::getProgress($user->id);
+            $metadata = DesignFactor::getMetadata('DF10');
+            $avgImp = 0;
+            $weight = 0;
+            $df4Mapping = [];
+            $df5 = null;
+            $df6 = null;
+            $df7Mapping = [];
+            $df8Mapping = [];
+            $df9Mapping = [];
+            $df10Mapping = \App\Models\DesignFactor::getDF10Mapping();
+
+            return view('design-factors.index', compact('results', 'factorInfo', 'progress', 'type', 'designFactor', 'avgImp', 'weight', 'metadata', 'df4Mapping', 'df5', 'df6', 'df7Mapping', 'df8Mapping', 'df9Mapping', 'df10Mapping'));
         }
 
         // Specific handling for DF9
@@ -906,11 +1005,20 @@ class DesignFactorController extends Controller
         $itemDict = collect($defaultItems)->keyBy('code');
 
         foreach ($df10Mapping as $code => $map) {
+            // Score = (FirstMover * FirstMover%) + (Follower * Follower%) + (SlowAdopter * SlowAdopter%)
             $score = ($map['first_mover'] * $importanceFirstMover / 100) +
                 ($map['follower'] * $importanceFollower / 100) +
                 ($map['slow_adopter'] * $importanceSlowAdopter / 100);
 
-            $baselineScore = $itemDict[$code]['baseline_score'] ?? 1.00;
+            // Baseline Score = (FirstMover * 15%) + (Follower * 70%) + (SlowAdopter * 15%)
+            // Fixed weights as requested
+            $baselineFirstMover = 15.00;
+            $baselineFollower = 70.00;
+            $baselineSlowAdopter = 15.00;
+
+            $baselineScore = ($map['first_mover'] * $baselineFirstMover / 100) +
+                ($map['follower'] * $baselineFollower / 100) +
+                ($map['slow_adopter'] * $baselineSlowAdopter / 100);
 
             $results[] = [
                 'code' => $code,

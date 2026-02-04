@@ -274,7 +274,7 @@
                     @endphp
                     <a href="{{ $isAccessible ? route('design-factors.index', $tabType) : '#' }}"
                         class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
-                                                                                                                                                                                                                                {{ $type === $tabType ? 'bg-green-600 text-white shadow-lg' : ($isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
+                                                                                                                                                                                                                                                            {{ $type === $tabType ? 'bg-green-600 text-white shadow-lg' : ($isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
                         {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
                         {{ $tabLabel }}
                         @if($isCompleted)
@@ -544,6 +544,21 @@
                             </div>
                         @else
                             <!-- Table container for regular Design Factors -->
+                            @if($type === 'DF9')
+                                <div id="df9SmartMessageBox" class="mb-4 p-3 rounded-lg border hidden">
+                                    <div class="flex items-center">
+                                        <div id="df9SmartIcon" class="mr-3"></div>
+                                        <div id="df9SmartContent" class="text-sm font-medium"></div>
+                                    </div>
+                                </div>
+                            @elseif($type === 'DF10')
+                                <div id="df10SmartMessageBox" class="mb-4 p-3 rounded-lg border hidden">
+                                    <div class="flex items-center">
+                                        <div id="df10SmartIcon" class="mr-3"></div>
+                                        <div id="df10SmartContent" class="text-sm font-medium"></div>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                                 <div class="lg:col-span-9 xl:col-span-10 overflow-x-auto min-w-0">
                                     <table
@@ -637,155 +652,175 @@
                                                                 elseif ($key === 'traditional')
                                                                     $inputId = 'importance_traditional';
                                                             @endphp
-                                                            <input type="number" name="inputs[{{ $key }}][importance]" id="{{ $inputId }}"
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                id="{{ $inputId }}"
                                                                 value="{{ data_get($designFactor->inputs, $key . '.importance', 33.33) }}"
                                                                 min="0" max="100" step="0.01"
                                                                 class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df9-input"
                                                                 data-key="{{ $key }}" {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
                                                             <span class="ml-1">%</span>
                                                         </td>
+                                                    @elseif($type === 'DF10')
+                                                        <td class="importance-cell">
+                                                            @php
+                                                                $inputId = '';
+                                                                if ($key === 'first_mover')
+                                                                    $inputId = 'importance_first_mover';
+                                                                elseif ($key === 'follower')
+                                                                    $inputId = 'importance_follower';
+                                                                elseif ($key === 'slow_adopter')
+                                                                    $inputId = 'importance_slow_adopter';
+                                                            @endphp
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                id="{{ $inputId }}"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', $key === 'first_mover' ? 75 : ($key === 'follower' ? 15 : 10)) }}"
+                                                                min="0" max="100" step="0.01"
+                                                                class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df10-input"
+                                                                data-key="{{ $key }}" {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                            <span class="ml-1">%</span>
+                                                        </td>
                                                     @else
-                                                                <td class="importance-cell">
-                                                                    <input type="number" name="inputs[{{ $key }}][importance]"
-                                                                        value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
-                                                                        min="1" max="5"
-                                                                        class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
-                                                                        data-key="{{ $key }}" {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
-                                                                </td>
-                                                            @endif
+                                                        <td class="importance-cell">
+                                                            <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
+                                                                min="1" max="5"
+                                                                class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
+                                                                data-key="{{ $key }}" {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                        </td>
+                                                    @endif
 
-                                                            <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
-                                                                @php
-                                                                    $baselineDefault = 3;
-                                                                    if ($type === 'DF3') {
-                                                                        $baselineDefault = 9;
-                                                                    } elseif ($type === 'DF4') {
-                                                                        $baselineDefault = 2;
-                                                                    }
-                                                                @endphp
-                                                                {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
-                                                                <input type="hidden" name="inputs[{{ $key }}][baseline]"
-                                                                    value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
-                                                                    class="baseline-input">
-                                                            </td>
-                                                        </tr>
+                                                    <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
+                                                        @php
+                                                            $baselineDefault = 3;
+                                                            if ($type === 'DF3') {
+                                                                $baselineDefault = 9;
+                                                            } elseif ($type === 'DF4') {
+                                                                $baselineDefault = 2;
+                                                            }
+                                                        @endphp
+                                                        {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
+                                                        <input type="hidden" name="inputs[{{ $key }}][baseline]"
+                                                            value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
+                                                            class="baseline-input">
+                                                    </td>
+                                                </tr>
                                             @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    @if($type === 'DF3')
-                                        <!-- Legend container -->
-                                        <div class="w-full lg:col-span-3 xl:col-span-2">
-                                            <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                                <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                                    <div class="w-4 h-4 rounded-full"
-                                                        style="background-color: #c00000; border: 1px solid #000;"></div>
-                                                    <span class="text-xs font-bold text-gray-800">Very High Risk</span>
-                                                </div>
-                                                <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                                    <div class="w-4 h-4 rounded-full"
-                                                        style="background-color: #edbd70; border: 1px solid #000;"></div>
-                                                    <span class="text-xs font-bold text-gray-800">High Risk</span>
-                                                </div>
-                                                <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                                    <div class="w-4 h-4 rounded-full"
-                                                        style="background-color: #72a488; border: 1px solid #000;"></div>
-                                                    <span class="text-xs font-bold text-gray-800">Normal Risk</span>
-                                                </div>
-                                                <div class="bg-white p-2 flex items-center gap-3">
-                                                    <div class="w-4 h-4 rounded-full"
-                                                        style="background-color: #4b4b4b; border: 1px solid #000;"></div>
-                                                    <span class="text-xs font-bold text-gray-800">Low Risk</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if($type === 'DF4')
-                                        <!-- Legend container for DF4 -->
-                                        <div class="w-full lg:col-span-3 xl:col-span-2">
-                                            <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                                <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
-                                                    <div class="w-5 h-5 rounded-full"
-                                                        style="background-color: #70ad47; border: 2px solid #000;"></div>
-                                                    <span class="text-sm font-bold text-gray-800">No Issue</span>
-                                                </div>
-                                                <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
-                                                    <div class="w-5 h-5 rounded-full"
-                                                        style="background-color: #ffc000; border: 2px solid #000;"></div>
-                                                    <span class="text-sm font-bold text-gray-800">Issue</span>
-                                                </div>
-                                                <div class="bg-white p-3 flex items-center gap-3">
-                                                    <div class="w-5 h-5 rounded-full"
-                                                        style="background-color: #c00000; border: 2px solid #000;"></div>
-                                                    <span class="text-sm font-bold text-gray-800">Serious Issue</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if($type === 'DF6')
-                                        <!-- DF6 Total Display and Legend -->
-                                        <div class="w-full lg:col-span-3 xl:col-span-2">
-                                            <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                                <div class="bg-white p-3 border-b border-gray-400">
-                                                    <p class="text-sm font-bold text-gray-800">Total Importance</p>
-                                                    <p class="text-2xl font-bold" id="df6TotalDisplay">100%</p>
-                                                    <p class="text-xs text-gray-500 mt-1" id="df6Warning"></p>
-                                                </div>
-                                                <div class="bg-green-50 p-3">
-                                                    <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-
-
-                                    @if($type === 'DF9')
-                                        <!-- Smart Message Box for DF9 -->
-                                        <div id="df9SmartMessageBox"
-                                            class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
-                                            <div class="flex items-start gap-3">
-                                                <div id="df9SmartIcon" class="mt-0.5">
-                                                    <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd"
-                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg>
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p id="df9SmartContent" class="text-sm font-medium">
-                                                        Total importance harus tepat 100%. Total saat ini: <span
-                                                            id="df9TotalDisplay">100</span>%.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if($type === 'DF10')
-                                        <!-- Smart Message Box for DF10 -->
-                                        <div id="df10SmartMessageBox"
-                                            class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
-                                            <div class="flex items-start gap-3">
-                                                <div id="df10SmartIcon" class="mt-0.5">
-                                                    <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd"
-                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg>
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p id="df10SmartContent" class="text-sm font-medium">
-                                                        Total importance harus tepat 100%. Total saat ini: <span
-                                                            id="df10TotalDisplay">100</span>%.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
+                                        </tbody>
+                                    </table>
                                 </div>
+                                @if($type === 'DF3')
+                                    <!-- Legend container -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #c00000; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">Very High Risk</span>
+                                            </div>
+                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #edbd70; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">High Risk</span>
+                                            </div>
+                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #72a488; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">Normal Risk</span>
+                                            </div>
+                                            <div class="bg-white p-2 flex items-center gap-3">
+                                                <div class="w-4 h-4 rounded-full"
+                                                    style="background-color: #4b4b4b; border: 1px solid #000;"></div>
+                                                <span class="text-xs font-bold text-gray-800">Low Risk</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($type === 'DF4')
+                                    <!-- Legend container for DF4 -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-5 h-5 rounded-full"
+                                                    style="background-color: #70ad47; border: 2px solid #000;"></div>
+                                                <span class="text-sm font-bold text-gray-800">No Issue</span>
+                                            </div>
+                                            <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
+                                                <div class="w-5 h-5 rounded-full"
+                                                    style="background-color: #ffc000; border: 2px solid #000;"></div>
+                                                <span class="text-sm font-bold text-gray-800">Issue</span>
+                                            </div>
+                                            <div class="bg-white p-3 flex items-center gap-3">
+                                                <div class="w-5 h-5 rounded-full"
+                                                    style="background-color: #c00000; border: 2px solid #000;"></div>
+                                                <span class="text-sm font-bold text-gray-800">Serious Issue</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($type === 'DF6')
+                                    <!-- DF6 Total Display and Legend -->
+                                    <div class="w-full lg:col-span-3 xl:col-span-2">
+                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                            <div class="bg-white p-3 border-b border-gray-400">
+                                                <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                                <p class="text-2xl font-bold" id="df6TotalDisplay">100%</p>
+                                                <p class="text-xs text-gray-500 mt-1" id="df6Warning"></p>
+                                            </div>
+                                            <div class="bg-green-50 p-3">
+                                                <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+
+
+                                @if($type === 'DF9')
+                                    <!-- Smart Message Box for DF9 -->
+                                    <div id="df9SmartMessageBox"
+                                        class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
+                                        <div class="flex items-start gap-3">
+                                            <div id="df9SmartIcon" class="mt-0.5">
+                                                <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p id="df9SmartContent" class="text-sm font-medium">
+                                                    Total importance harus tepat 100%. Total saat ini: <span
+                                                        id="df9TotalDisplay">100</span>%.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($type === 'DF10')
+                                    <!-- Smart Message Box for DF10 -->
+                                    <div id="df10SmartMessageBox"
+                                        class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
+                                        <div class="flex items-start gap-3">
+                                            <div id="df10SmartIcon" class="mt-0.5">
+                                                <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p id="df10SmartContent" class="text-sm font-medium">
+                                                    Total importance harus tepat 100%. Total saat ini: <span
+                                                        id="df10TotalDisplay">100</span>%.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -812,12 +847,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @endif">
                                                     {{ $result['code'] }}
                                                 </span>
                                                 <span class="ml-2">{{ $result['name'] }}</span>
@@ -830,10 +865,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                                                                                                                                    @if($result['relative_importance'] > 0) value-positive
-                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif($result['relative_importance'] < 0) value-negative
-                                                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
-                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @if($result['relative_importance'] > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @elseif($result['relative_importance'] < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @else value-neutral
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @endif">
                                                     {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                                 </span>
                                             </td>
@@ -881,12 +916,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                                                                                                                            @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                                                                                                                            @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
                                                     {{ $result['code'] }}
                                                 </span>
                                                 <span class="ml-2">{{ $result['name'] }}</span>
@@ -899,10 +934,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                                                                                                                            @if($result['relative_importance'] > 0) value-positive
-                                                                                                                                                                                                                                                                                                                                                                                                            @elseif($result['relative_importance'] < 0) value-negative
-                                                                                                                                                                                                                                                                                                                                                                                                            @else value-neutral
-                                                                                                                                                                                                                                                                                                                                                                                                            @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if($result['relative_importance'] > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif($result['relative_importance'] < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
                                                     {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                                 </span>
                                             </td>
@@ -950,12 +985,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                                                     @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                                                     @endif">
+                                                                                                                                                                                                                                                                                                                                                                                             @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                                                                             @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                                                                             @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                                                                             @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                                                                             @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                                                                             @endif">
                                                     {{ $result['code'] }}
                                                 </span>
                                                 <input type="hidden" name="items[{{ $index }}][code]"
@@ -984,10 +1019,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                                                     @if($result['relative_importance'] > 0) value-positive
-                                                                                                                                                                                                                                                                                                                                     @elseif($result['relative_importance'] < 0) value-negative
-                                                                                                                                                                                                                                                                                                                                     @else value-neutral
-                                                                                                                                                                                                                                                                                                                                     @endif">
+                                                                                                                                                                                                                                                                                                                                                                                             @if($result['relative_importance'] > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                                                                             @elseif($result['relative_importance'] < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                                                                             @else value-neutral
+                                                                                                                                                                                                                                                                                                                                                                                             @endif">
                                                     {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                                 </span>
                                             </td>
@@ -1033,13 +1068,14 @@
                                     @foreach($results as $index => $result)
                                         <tr>
                                             <td>
-                                                <span class="px-3 py-1 text-sm font-black rounded
-                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                    @endif">
+                                                <span
+                                                    class="px-3 py-1 text-sm font-black rounded
+                                                                                                                                            @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                                                                            @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                                                                            @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                                                                            @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                                                                            @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                                                                            @endif">
                                                     {{ $result['code'] }}
                                                 </span>
                                                 <input type="hidden" name="items[{{ $index }}][code]"
@@ -1067,11 +1103,12 @@
                                                 {{ number_format($result['baseline_score'], 2) }}
                                             </td>
                                             <td>
-                                                <span class="relative-importance font-black text-lg
-                                                                                    @if($result['relative_importance'] > 0) value-positive
-                                                                                    @elseif($result['relative_importance'] < 0) value-negative
-                                                                                    @else value-neutral
-                                                                                    @endif">
+                                                <span
+                                                    class="relative-importance font-black text-lg
+                                                                                                                                            @if($result['relative_importance'] > 0) value-positive
+                                                                                                                                            @elseif($result['relative_importance'] < 0) value-negative
+                                                                                                                                            @else value-neutral
+                                                                                                                                            @endif">
                                                     {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                                 </span>
                                             </td>
@@ -1094,6 +1131,91 @@
                             <h2 class="text-lg font-bold text-gray-800 mb-2">DF9 Radar</h2>
                             <div class="relative" style="height: 700px;">
                                 <canvas id="df9RadarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($type === 'DF10')
+                    <!-- Section 2: DF10 Results -->
+                    <!-- Results Table -->
+                    <div class="mb-6 overflow-hidden light-card rounded-xl shadow-sm">
+                        <div class="p-4 border-b border-gray-200 bg-slate-50">
+                            <h2 class="text-xl font-bold text-gray-800">Governance/Management Objectives Results</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="clean-table" id="df10ResultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Governance / Management Objective</th>
+                                        <th>Score</th>
+                                        <th>Baseline Score</th>
+                                        <th>Relative Importance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($results as $index => $result)
+                                        <tr>
+                                            <td>
+                                                <span class="px-3 py-1 text-sm font-black rounded
+                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                    @endif">
+                                                    {{ $result['code'] }}
+                                                </span>
+                                                <input type="hidden" name="items[{{ $index }}][code]"
+                                                    value="{{ $result['code'] }}">
+                                                <input type="hidden" name="items[{{ $index }}][score]"
+                                                    value="{{ $result['score'] }}" class="item-score-hidden">
+                                                <input type="hidden" name="items[{{ $index }}][baseline_score]"
+                                                    value="{{ $result['baseline_score'] }}" class="item-baseline-hidden">
+
+                                                @if(isset($df10Mapping[$result['code']]))
+                                                    <input type="hidden" class="item-first-mover-value"
+                                                        value="{{ $df10Mapping[$result['code']]['first_mover'] }}">
+                                                    <input type="hidden" class="item-follower-value"
+                                                        value="{{ $df10Mapping[$result['code']]['follower'] }}">
+                                                    <input type="hidden" class="item-slow-adopter-value"
+                                                        value="{{ $df10Mapping[$result['code']]['slow_adopter'] }}">
+                                                @endif
+
+                                                <span class="ml-2">{{ $result['name'] }}</span>
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-score-display">
+                                                {{ number_format($result['score'], 2) }}
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-baseline-display">
+                                                {{ number_format($result['baseline_score'], 2) }}
+                                            </td>
+                                            <td>
+                                                <span class="relative-importance font-black text-lg
+                                                                                    @if($result['relative_importance'] > 0) value-positive
+                                                                                    @elseif($result['relative_importance'] < 0) value-negative
+                                                                                    @else value-neutral
+                                                                                    @endif">
+                                                    {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: DF10 Charts -->
+                    <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
+                        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+                            <h2 class="text-lg font-bold text-gray-800 mb-2">DF10 Output</h2>
+                            <div class="relative" style="height: 700px;">
+                                <canvas id="df10BarChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+                            <h2 class="text-lg font-bold text-gray-800 mb-2">DF10 Radar</h2>
+                            <div class="relative" style="height: 700px;">
+                                <canvas id="df10RadarChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -1121,12 +1243,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($item->code, 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($item->code, 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
                                                     {{ $item->code }}
                                                 </span>
                                                 <input type="hidden" name="items[{{ $index }}][code]" value="{{ $item->code }}">
@@ -1185,10 +1307,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if($item->relative_importance > 0) value-positive
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif($item->relative_importance < 0) value-negative
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if($item->relative_importance > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif($item->relative_importance < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif"
                                                     data-index="{{ $index }}">
                                                     {{ $item->relative_importance > 0 ? '+' : '' }}{{ (int) $item->relative_importance }}
                                                 </span>
@@ -1385,6 +1507,8 @@
                 let df8RadarChart = null;
                 let df9BarChart = null;
                 let df9RadarChart = null;
+                let df10BarChart = null;
+                let df10RadarChart = null;
 
                 function initCharts() {
                     if (factorType === 'DF5') {
@@ -1622,6 +1746,72 @@
                         });
 
                         df9RadarChart = new Chart(radarCtx, {
+                            type: 'radar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Relative Importance',
+                                    data: data.map(v => v + 100),
+                                    backgroundColor: 'rgba(229, 180, 229, 0.3)',
+                                    borderColor: 'rgba(229, 180, 229, 1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: 'rgba(229, 180, 229, 1)',
+                                    pointRadius: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    r: {
+                                        min: 0, max: 200,
+                                        ticks: { stepSize: 50, callback: v => v - 100, backdropColor: 'transparent' },
+                                        pointLabels: { font: { size: 10, weight: 'bold' } }
+                                    }
+                                }
+                            }
+                        });
+                        return;
+                    }
+
+                    if (factorType === 'DF10') {
+                        const barCanvas = document.getElementById('df10BarChart');
+                        const radarCanvas = document.getElementById('df10RadarChart');
+                        if (!barCanvas || !radarCanvas) return;
+
+                        const barCtx = barCanvas.getContext('2d');
+                        const radarCtx = radarCanvas.getContext('2d');
+
+                        const results = @json($results ?? []);
+                        const labels = results.map(r => r.code);
+                        const data = results.map(r => r.relative_importance);
+
+                        df10BarChart = new Chart(barCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Relative Importance',
+                                    data: data,
+                                    backgroundColor: data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)'),
+                                    borderColor: data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)'),
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { min: -100, max: 100, grid: { color: '#e5e7eb' }, ticks: { stepSize: 25 } },
+                                    y: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
+                                }
+                            }
+                        });
+
+                        df10RadarChart = new Chart(radarCtx, {
                             type: 'radar',
                             data: {
                                 labels: labels,
@@ -2086,13 +2276,13 @@
                             'bg-blue-500 text-white'
                         }`;
                     notification.innerHTML = `
-                                                                                                                                                                                                                <div class="flex items-center gap-2">
-                                                                                                                                                                                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                                                                                                                                                                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                                                                                                                                                                                                    </svg>
-                                                                                                                                                                                                                    <span class="font-medium">${message}</span>
-                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                            `;
+                                                                                                                                                                                                                                        <div class="flex items-center gap-2">
+                                                                                                                                                                                                                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                                                                                                                                                                                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                                                                                                                                                                                                            </svg>
+                                                                                                                                                                                                                                            <span class="font-medium">${message}</span>
+                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                    `;
                     document.body.appendChild(notification);
 
                     // Auto remove after 3 seconds
@@ -2211,18 +2401,18 @@
                             const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
                             const sign = result.relative_importance > 0 ? '+' : '';
                             tbody.innerHTML += `
-                                                                                                                                                                                                            <tr>
-                                                                                                                                                                                                                <td>
-                                                                                                                                                                                                                    <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
-                                                                                                                                                                                                                    <span class="ml-2">${result.name}</span>
-                                                                                                                                                                                                                </td>
-                                                                                                                                                                                                                <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
-                                                                                                                                                                                                                <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
-                                                                                                                                                                                                                <td>
-                                                                                                                                                                                                                    <span class="font-black text-lg ${valClass}">${sign}${Math.round(result.relative_importance)}</span>
-                                                                                                                                                                                                                </td>
-                                                                                                                                                                                                            </tr>
-                                                                                                                                                                                                        `;
+                                                                                                                                                                                                                                    <tr>
+                                                                                                                                                                                                                                        <td>
+                                                                                                                                                                                                                                            <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                                                                                                                                                                                                            <span class="ml-2">${result.name}</span>
+                                                                                                                                                                                                                                        </td>
+                                                                                                                                                                                                                                        <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
+                                                                                                                                                                                                                                        <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
+                                                                                                                                                                                                                                        <td>
+                                                                                                                                                                                                                                            <span class="font-black text-lg ${valClass}">${sign}${Math.round(result.relative_importance)}</span>
+                                                                                                                                                                                                                                        </td>
+                                                                                                                                                                                                                                    </tr>
+                                                                                                                                                                                                                                `;
                         });
                     }
 
@@ -2351,20 +2541,20 @@
                             const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
                             const sign = result.relative_importance > 0 ? '+' : '';
                             tbody.innerHTML += `
-                                                                                                                                                                        <tr>
-                                                                                                                                                                            <td>
-                                                                                                                                                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
-                                                                                                                                                                                <span class="ml-2">${result.name}</span>
-                                                                                                                                                                            </td>
-                                                                                                                                                                            <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
-                                                                                                                                                                            <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
-                                                                                                                                                                            <td>
-                                                                                                                                                                                <span class="relative-importance font-black text-lg ${valClass}">
-                                                                                                                                                                                    ${sign}${Math.round(result.relative_importance)}
-                                                                                                                                                                                </span>
-                                                                                                                                                                            </td>
-                                                                                                                                                                        </tr>
-                                                                                                                                                                    `;
+                                                                                                                                                                                                <tr>
+                                                                                                                                                                                                    <td>
+                                                                                                                                                                                                        <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                                                                                                                                                                        <span class="ml-2">${result.name}</span>
+                                                                                                                                                                                                    </td>
+                                                                                                                                                                                                    <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
+                                                                                                                                                                                                    <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
+                                                                                                                                                                                                    <td>
+                                                                                                                                                                                                        <span class="relative-importance font-black text-lg ${valClass}">
+                                                                                                                                                                                                            ${sign}${Math.round(result.relative_importance)}
+                                                                                                                                                                                                        </span>
+                                                                                                                                                                                                    </td>
+                                                                                                                                                                                                </tr>
+                                                                                                                                                                                            `;
                         });
                     }
 
@@ -2504,28 +2694,28 @@
                             const insVal = document.querySelector(`.item-insourced-value[data-code="${result.code}"]`)?.value || 1;
 
                             tbody.innerHTML += `
-                                                                                                                                                                        <tr>
-                                                                                                                                                                            <td>
-                                                                                                                                                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
-                                                                                                                                                                                <input type="hidden" name="items[${index}][code]" value="${result.code}">
-                                                                                                                                                                                <input type="hidden" name="items[${index}][score]" value="${result.score}" class="item-score-hidden">
-                                                                                                                                                                                <input type="hidden" name="items[${index}][baseline_score]" value="${result.baseline_score}" class="item-baseline-hidden">
+                                                                                                                                                                                                <tr>
+                                                                                                                                                                                                    <td>
+                                                                                                                                                                                                        <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                                                                                                                                                                        <input type="hidden" name="items[${index}][code]" value="${result.code}">
+                                                                                                                                                                                                        <input type="hidden" name="items[${index}][score]" value="${result.score}" class="item-score-hidden">
+                                                                                                                                                                                                        <input type="hidden" name="items[${index}][baseline_score]" value="${result.baseline_score}" class="item-baseline-hidden">
 
-                                                                                                                                                                                <input type="hidden" class="item-outsourcing-value" value="${outVal}" data-code="${result.code}">
-                                                                                                                                                                                <input type="hidden" class="item-cloud-value" value="${cloudVal}" data-code="${result.code}">
-                                                                                                                                                                                <input type="hidden" class="item-insourced-value" value="${insVal}" data-code="${result.code}">
+                                                                                                                                                                                                        <input type="hidden" class="item-outsourcing-value" value="${outVal}" data-code="${result.code}">
+                                                                                                                                                                                                        <input type="hidden" class="item-cloud-value" value="${cloudVal}" data-code="${result.code}">
+                                                                                                                                                                                                        <input type="hidden" class="item-insourced-value" value="${insVal}" data-code="${result.code}">
 
-                                                                                                                                                                                <span class="ml-2">${result.name}</span>
-                                                                                                                                                                            </td>
-                                                                                                                                                                            <td class="font-bold text-gray-700 item-score-display">${(result.score).toFixed(1)}</td>
-                                                                                                                                                                            <td class="font-bold text-gray-700 item-baseline-display">${(result.baseline_score).toFixed(2)}</td>
-                                                                                                                                                                            <td>
-                                                                                                                                                                                <span class="relative-importance font-black text-lg ${valClass}">
-                                                                                                                                                                                    ${sign}${Math.round(result.relative_importance)}
-                                                                                                                                                                                </span>
-                                                                                                                                                                            </td>
-                                                                                                                                                                        </tr>
-                                                                                                                                                                    `;
+                                                                                                                                                                                                        <span class="ml-2">${result.name}</span>
+                                                                                                                                                                                                    </td>
+                                                                                                                                                                                                    <td class="font-bold text-gray-700 item-score-display">${(result.score).toFixed(1)}</td>
+                                                                                                                                                                                                    <td class="font-bold text-gray-700 item-baseline-display">${(result.baseline_score).toFixed(2)}</td>
+                                                                                                                                                                                                    <td>
+                                                                                                                                                                                                        <span class="relative-importance font-black text-lg ${valClass}">
+                                                                                                                                                                                                            ${sign}${Math.round(result.relative_importance)}
+                                                                                                                                                                                                        </span>
+                                                                                                                                                                                                    </td>
+                                                                                                                                                                                                </tr>
+                                                                                                                                                                                            `;
                         });
                     }
 
@@ -2664,23 +2854,23 @@
                             // For now we assume they are unused for display, or we can look them up
 
                             tbody.innerHTML += `
-                                        <tr>
-                                            <td>
-                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
-                                                <input type="hidden" name="items[${idx}][code]" value="${result.code}">
-                                                <input type="hidden" name="items[${idx}][score]" value="${result.score}">
-                                                <input type="hidden" name="items[${idx}][baseline_score]" value="${result.baseline_score}">
-                                                <span class="ml-2">${result.name}</span>
-                                            </td>
-                                            <td class="font-bold text-gray-700 item-score-display">${result.score.toFixed(2)}</td>
-                                            <td class="font-bold text-gray-700 item-baseline-display">${result.baseline_score.toFixed(2)}</td>
-                                            <td>
-                                                <span class="relative-importance font-black text-lg ${valClass}">
-                                                    ${sign}${Math.round(result.relative_importance)}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                     `;
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                                        <input type="hidden" name="items[${idx}][code]" value="${result.code}">
+                                                                        <input type="hidden" name="items[${idx}][score]" value="${result.score}">
+                                                                        <input type="hidden" name="items[${idx}][baseline_score]" value="${result.baseline_score}">
+                                                                        <span class="ml-2">${result.name}</span>
+                                                                    </td>
+                                                                    <td class="font-bold text-gray-700 item-score-display">${result.score.toFixed(2)}</td>
+                                                                    <td class="font-bold text-gray-700 item-baseline-display">${result.baseline_score.toFixed(2)}</td>
+                                                                    <td>
+                                                                        <span class="relative-importance font-black text-lg ${valClass}">
+                                                                            ${sign}${Math.round(result.relative_importance)}
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                             `;
                         });
                     }
 
@@ -2760,6 +2950,25 @@
                         updateSmartMessageDF10(fm, f, sa, total);
                     }
 
+                    function updateDF10Charts(results) {
+                        const labels = results.map(r => r.code);
+                        const data = results.map(r => r.relative_importance);
+
+                        if (df10BarChart) {
+                            df10BarChart.data.labels = labels;
+                            df10BarChart.data.datasets[0].data = data;
+                            df10BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
+                            df10BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
+                            df10BarChart.update();
+                        }
+
+                        if (df10RadarChart) {
+                            df10RadarChart.data.labels = labels;
+                            df10RadarChart.data.datasets[0].data = data.map(v => v + 100);
+                            df10RadarChart.update();
+                        }
+                    }
+
                     function autoCalculateDF10() {
                         const fm = parseFloat(firstMoverInput.value) || 0;
                         const f = parseFloat(followerInput.value) || 0;
@@ -2781,7 +2990,8 @@
                             .then(data => {
                                 if (data.success) {
                                     updateDF10ResultsTable(data.results);
-                                    calculate(); // Sy        nc global charts
+                                    if (window.df10BarChart) updateDF10Charts(data.results);
+                                    else calculate(); // Fallback
                                 }
                             });
                     }

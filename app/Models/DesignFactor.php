@@ -607,48 +607,18 @@ class DesignFactor extends Model
      */
     public static function getDF10Mapping(): array
     {
-        return [
-            'EDM01' => ['first_mover' => 3.5, 'follower' => 2.5, 'slow_adopter' => 1.5],
-            'EDM02' => ['first_mover' => 4.0, 'follower' => 2.5, 'slow_adopter' => 1.5],
-            'EDM03' => ['first_mover' => 1.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'EDM04' => ['first_mover' => 2.5, 'follower' => 2.0, 'slow_adopter' => 1.5],
-            'EDM05' => ['first_mover' => 1.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'APO01' => ['first_mover' => 2.5, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'APO02' => ['first_mover' => 4.0, 'follower' => 3.0, 'slow_adopter' => 1.5],
-            'APO03' => ['first_mover' => 2.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'APO04' => ['first_mover' => 4.0, 'follower' => 3.0, 'slow_adopter' => 1.0],
-            'APO05' => ['first_mover' => 4.0, 'follower' => 2.5, 'slow_adopter' => 1.0],
-            'APO06' => ['first_mover' => 1.0, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'APO07' => ['first_mover' => 2.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'APO08' => ['first_mover' => 3.0, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'APO09' => ['first_mover' => 1.5, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'APO10' => ['first_mover' => 2.5, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'APO11' => ['first_mover' => 1.5, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'APO12' => ['first_mover' => 2.0, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'APO13' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'APO14' => ['first_mover' => 2.5, 'follower' => 2.0, 'slow_adopter' => 1.0],
-            'BAI01' => ['first_mover' => 4.0, 'follower' => 3.0, 'slow_adopter' => 1.5],
-            'BAI02' => ['first_mover' => 3.5, 'follower' => 2.5, 'slow_adopter' => 1.0],
-            'BAI03' => ['first_mover' => 4.0, 'follower' => 2.5, 'slow_adopter' => 1.0],
-            'BAI04' => ['first_mover' => 1.5, 'follower' => 1.5, 'slow_adopter' => 1.0],
-            'BAI05' => ['first_mover' => 3.0, 'follower' => 2.0, 'slow_adopter' => 1.0],
-            'BAI06' => ['first_mover' => 2.5, 'follower' => 2.0, 'slow_adopter' => 1.0],
-            'BAI07' => ['first_mover' => 3.5, 'follower' => 2.5, 'slow_adopter' => 1.0],
-            'BAI08' => ['first_mover' => 1.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'BAI09' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'BAI10' => ['first_mover' => 1.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'BAI11' => ['first_mover' => 3.5, 'follower' => 2.5, 'slow_adopter' => 1.0],
-            'DSS01' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'DSS02' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'DSS03' => ['first_mover' => 1.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'DSS04' => ['first_mover' => 1.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'DSS05' => ['first_mover' => 1.5, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'DSS06' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'MEA01' => ['first_mover' => 3.0, 'follower' => 2.0, 'slow_adopter' => 1.0],
-            'MEA02' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'MEA03' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-            'MEA04' => ['first_mover' => 1.0, 'follower' => 1.0, 'slow_adopter' => 1.0],
-        ];
+        $df10Maps = \App\Models\Df10Map::all();
+        $mapping = [];
+
+        foreach ($df10Maps as $map) {
+            $mapping[$map->objective_code] = [
+                'first_mover' => (float) $map->first_mover,
+                'follower' => (float) $map->follower,
+                'slow_adopter' => (float) $map->slow_adopter,
+            ];
+        }
+
+        return $mapping;
     }
 
     /**
