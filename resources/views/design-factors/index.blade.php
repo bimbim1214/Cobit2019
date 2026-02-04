@@ -274,7 +274,7 @@
                     @endphp
                     <a href="{{ $isAccessible ? route('design-factors.index', $tabType) : '#' }}"
                         class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
-                                                                                                                                                                                                            {{ $type === $tabType ? 'bg-green-600 text-white shadow-lg' : ($isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
+                                                                                                                                                                                                                                {{ $type === $tabType ? 'bg-green-600 text-white shadow-lg' : ($isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60') }}"
                         {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
                         {{ $tabLabel }}
                         @if($isCompleted)
@@ -626,148 +626,166 @@
                                                                 </label>
                                                             </div>
                                                         </td>
-                                                    @else
+                                                    @elseif($type === 'DF9')
                                                         <td class="importance-cell">
-                                                            <input type="number" name="inputs[{{ $key }}][importance]"
-                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
-                                                                min="1" max="5"
-                                                                class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
+                                                            @php
+                                                                $inputId = '';
+                                                                if ($key === 'agile')
+                                                                    $inputId = 'importance_agile';
+                                                                elseif ($key === 'devops')
+                                                                    $inputId = 'importance_devops';
+                                                                elseif ($key === 'traditional')
+                                                                    $inputId = 'importance_traditional';
+                                                            @endphp
+                                                            <input type="number" name="inputs[{{ $key }}][importance]" id="{{ $inputId }}"
+                                                                value="{{ data_get($designFactor->inputs, $key . '.importance', 33.33) }}"
+                                                                min="0" max="100" step="0.01"
+                                                                class="w-24 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 df9-input"
                                                                 data-key="{{ $key }}" {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                            <span class="ml-1">%</span>
                                                         </td>
-                                                    @endif
+                                                    @else
+                                                                <td class="importance-cell">
+                                                                    <input type="number" name="inputs[{{ $key }}][importance]"
+                                                                        value="{{ data_get($designFactor->inputs, $key . '.importance', 3) }}"
+                                                                        min="1" max="5"
+                                                                        class="w-16 px-2 py-1 text-center font-extrabold bg-white border border-gray-300 rounded focus:outline-none focus:border-green-500 importance-input"
+                                                                        data-key="{{ $key }}" {{ $designFactor->is_locked ? 'disabled readonly' : '' }}>
+                                                                </td>
+                                                            @endif
 
-                                                    <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
-                                                        @php
-                                                            $baselineDefault = 3;
-                                                            if ($type === 'DF3') {
-                                                                $baselineDefault = 9;
-                                                            } elseif ($type === 'DF4') {
-                                                                $baselineDefault = 2;
-                                                            }
-                                                        @endphp
-                                                        {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
-                                                        <input type="hidden" name="inputs[{{ $key }}][baseline]"
-                                                            value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
-                                                            class="baseline-input">
-                                                    </td>
-                                                </tr>
+                                                            <td class="{{ $type === 'DF3' ? 'df3-baseline' : 'baseline-col' }}">
+                                                                @php
+                                                                    $baselineDefault = 3;
+                                                                    if ($type === 'DF3') {
+                                                                        $baselineDefault = 9;
+                                                                    } elseif ($type === 'DF4') {
+                                                                        $baselineDefault = 2;
+                                                                    }
+                                                                @endphp
+                                                                {{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}
+                                                                <input type="hidden" name="inputs[{{ $key }}][baseline]"
+                                                                    value="{{ data_get($designFactor->inputs, $key . '.baseline', $baselineDefault) }}"
+                                                                    class="baseline-input">
+                                                            </td>
+                                                        </tr>
                                             @endforeach
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    @if($type === 'DF3')
+                                        <!-- Legend container -->
+                                        <div class="w-full lg:col-span-3 xl:col-span-2">
+                                            <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                                <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                    <div class="w-4 h-4 rounded-full"
+                                                        style="background-color: #c00000; border: 1px solid #000;"></div>
+                                                    <span class="text-xs font-bold text-gray-800">Very High Risk</span>
+                                                </div>
+                                                <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                    <div class="w-4 h-4 rounded-full"
+                                                        style="background-color: #edbd70; border: 1px solid #000;"></div>
+                                                    <span class="text-xs font-bold text-gray-800">High Risk</span>
+                                                </div>
+                                                <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
+                                                    <div class="w-4 h-4 rounded-full"
+                                                        style="background-color: #72a488; border: 1px solid #000;"></div>
+                                                    <span class="text-xs font-bold text-gray-800">Normal Risk</span>
+                                                </div>
+                                                <div class="bg-white p-2 flex items-center gap-3">
+                                                    <div class="w-4 h-4 rounded-full"
+                                                        style="background-color: #4b4b4b; border: 1px solid #000;"></div>
+                                                    <span class="text-xs font-bold text-gray-800">Low Risk</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if($type === 'DF4')
+                                        <!-- Legend container for DF4 -->
+                                        <div class="w-full lg:col-span-3 xl:col-span-2">
+                                            <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                                <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
+                                                    <div class="w-5 h-5 rounded-full"
+                                                        style="background-color: #70ad47; border: 2px solid #000;"></div>
+                                                    <span class="text-sm font-bold text-gray-800">No Issue</span>
+                                                </div>
+                                                <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
+                                                    <div class="w-5 h-5 rounded-full"
+                                                        style="background-color: #ffc000; border: 2px solid #000;"></div>
+                                                    <span class="text-sm font-bold text-gray-800">Issue</span>
+                                                </div>
+                                                <div class="bg-white p-3 flex items-center gap-3">
+                                                    <div class="w-5 h-5 rounded-full"
+                                                        style="background-color: #c00000; border: 2px solid #000;"></div>
+                                                    <span class="text-sm font-bold text-gray-800">Serious Issue</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if($type === 'DF6')
+                                        <!-- DF6 Total Display and Legend -->
+                                        <div class="w-full lg:col-span-3 xl:col-span-2">
+                                            <div class="border border-gray-400 overflow-hidden shadow-sm">
+                                                <div class="bg-white p-3 border-b border-gray-400">
+                                                    <p class="text-sm font-bold text-gray-800">Total Importance</p>
+                                                    <p class="text-2xl font-bold" id="df6TotalDisplay">100%</p>
+                                                    <p class="text-xs text-gray-500 mt-1" id="df6Warning"></p>
+                                                </div>
+                                                <div class="bg-green-50 p-3">
+                                                    <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+
+
+                                    @if($type === 'DF9')
+                                        <!-- Smart Message Box for DF9 -->
+                                        <div id="df9SmartMessageBox"
+                                            class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
+                                            <div class="flex items-start gap-3">
+                                                <div id="df9SmartIcon" class="mt-0.5">
+                                                    <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd"
+                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p id="df9SmartContent" class="text-sm font-medium">
+                                                        Total importance harus tepat 100%. Total saat ini: <span
+                                                            id="df9TotalDisplay">100</span>%.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if($type === 'DF10')
+                                        <!-- Smart Message Box for DF10 -->
+                                        <div id="df10SmartMessageBox"
+                                            class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
+                                            <div class="flex items-start gap-3">
+                                                <div id="df10SmartIcon" class="mt-0.5">
+                                                    <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd"
+                                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p id="df10SmartContent" class="text-sm font-medium">
+                                                        Total importance harus tepat 100%. Total saat ini: <span
+                                                            id="df10TotalDisplay">100</span>%.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
-                                @if($type === 'DF3')
-                                    <!-- Legend container -->
-                                    <div class="w-full lg:col-span-3 xl:col-span-2">
-                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                                <div class="w-4 h-4 rounded-full"
-                                                    style="background-color: #c00000; border: 1px solid #000;"></div>
-                                                <span class="text-xs font-bold text-gray-800">Very High Risk</span>
-                                            </div>
-                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                                <div class="w-4 h-4 rounded-full"
-                                                    style="background-color: #edbd70; border: 1px solid #000;"></div>
-                                                <span class="text-xs font-bold text-gray-800">High Risk</span>
-                                            </div>
-                                            <div class="bg-white p-2 border-b border-gray-400 flex items-center gap-3">
-                                                <div class="w-4 h-4 rounded-full"
-                                                    style="background-color: #72a488; border: 1px solid #000;"></div>
-                                                <span class="text-xs font-bold text-gray-800">Normal Risk</span>
-                                            </div>
-                                            <div class="bg-white p-2 flex items-center gap-3">
-                                                <div class="w-4 h-4 rounded-full"
-                                                    style="background-color: #4b4b4b; border: 1px solid #000;"></div>
-                                                <span class="text-xs font-bold text-gray-800">Low Risk</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($type === 'DF4')
-                                    <!-- Legend container for DF4 -->
-                                    <div class="w-full lg:col-span-3 xl:col-span-2">
-                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                            <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
-                                                <div class="w-5 h-5 rounded-full"
-                                                    style="background-color: #70ad47; border: 2px solid #000;"></div>
-                                                <span class="text-sm font-bold text-gray-800">No Issue</span>
-                                            </div>
-                                            <div class="bg-white p-3 border-b border-gray-400 flex items-center gap-3">
-                                                <div class="w-5 h-5 rounded-full"
-                                                    style="background-color: #ffc000; border: 2px solid #000;"></div>
-                                                <span class="text-sm font-bold text-gray-800">Issue</span>
-                                            </div>
-                                            <div class="bg-white p-3 flex items-center gap-3">
-                                                <div class="w-5 h-5 rounded-full"
-                                                    style="background-color: #c00000; border: 2px solid #000;"></div>
-                                                <span class="text-sm font-bold text-gray-800">Serious Issue</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($type === 'DF6')
-                                    <!-- DF6 Total Display and Legend -->
-                                    <div class="w-full lg:col-span-3 xl:col-span-2">
-                                        <div class="border border-gray-400 overflow-hidden shadow-sm">
-                                            <div class="bg-white p-3 border-b border-gray-400">
-                                                <p class="text-sm font-bold text-gray-800">Total Importance</p>
-                                                <p class="text-2xl font-bold" id="df6TotalDisplay">100%</p>
-                                                <p class="text-xs text-gray-500 mt-1" id="df6Warning"></p>
-                                            </div>
-                                            <div class="bg-green-50 p-3">
-                                                <p class="text-xs font-medium text-green-700">Total harus = 100%</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-
-
-                                @if($type === 'DF9')
-                                    <!-- Smart Message Box for DF9 -->
-                                    <div id="df9SmartMessageBox"
-                                        class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
-                                        <div class="flex items-start gap-3">
-                                            <div id="df9SmartIcon" class="mt-0.5">
-                                                <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                        clip-rule="evenodd"></path>
-                                                </svg>
-                                            </div>
-                                            <div class="flex-1">
-                                                <p id="df9SmartContent" class="text-sm font-medium">
-                                                    Total importance harus tepat 100%. Total saat ini: <span
-                                                        id="df9TotalDisplay">100</span>%.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($type === 'DF10')
-                                    <!-- Smart Message Box for DF10 -->
-                                    <div id="df10SmartMessageBox"
-                                        class="mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
-                                        <div class="flex items-start gap-3">
-                                            <div id="df10SmartIcon" class="mt-0.5">
-                                                <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                        clip-rule="evenodd"></path>
-                                                </svg>
-                                            </div>
-                                            <div class="flex-1">
-                                                <p id="df10SmartContent" class="text-sm font-medium">
-                                                    Total importance harus tepat 100%. Total saat ini: <span
-                                                        id="df10TotalDisplay">100</span>%.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
                         @endif
                     </div>
                 </div>
@@ -794,12 +812,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                                                                                                    @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
                                                     {{ $result['code'] }}
                                                 </span>
                                                 <span class="ml-2">{{ $result['name'] }}</span>
@@ -812,10 +830,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                                                                                                    @if($result['relative_importance'] > 0) value-positive
-                                                                                                                                                                                                                                                                                                                                                                                    @elseif($result['relative_importance'] < 0) value-negative
-                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
-                                                                                                                                                                                                                                                                                                                                                                                    @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                    @if($result['relative_importance'] > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif($result['relative_importance'] < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
+                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
                                                     {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                                 </span>
                                             </td>
@@ -863,12 +881,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                                                                                            @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                                                                                            @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                            @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                                                                                            @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                                                                                            @endif">
                                                     {{ $result['code'] }}
                                                 </span>
                                                 <span class="ml-2">{{ $result['name'] }}</span>
@@ -881,10 +899,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                                                                                            @if($result['relative_importance'] > 0) value-positive
-                                                                                                                                                                                                                                                                                                                                                                            @elseif($result['relative_importance'] < 0) value-negative
-                                                                                                                                                                                                                                                                                                                                                                            @else value-neutral
-                                                                                                                                                                                                                                                                                                                                                                            @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                            @if($result['relative_importance'] > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                                                                                            @elseif($result['relative_importance'] < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                                                                                            @else value-neutral
+                                                                                                                                                                                                                                                                                                                                                                                                            @endif">
                                                     {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                                 </span>
                                             </td>
@@ -932,12 +950,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                     @if(str_starts_with($result['code'], 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                     @endif">
+                                                                                                                                                                                                                                                                                                                                     @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                     @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                     @endif">
                                                     {{ $result['code'] }}
                                                 </span>
                                                 <input type="hidden" name="items[{{ $index }}][code]"
@@ -966,10 +984,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                     @if($result['relative_importance'] > 0) value-positive
-                                                                                                                                                                                                                                                                                                     @elseif($result['relative_importance'] < 0) value-negative
-                                                                                                                                                                                                                                                                                                     @else value-neutral
-                                                                                                                                                                                                                                                                                                     @endif">
+                                                                                                                                                                                                                                                                                                                                     @if($result['relative_importance'] > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                     @elseif($result['relative_importance'] < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                     @else value-neutral
+                                                                                                                                                                                                                                                                                                                                     @endif">
                                                     {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
                                                 </span>
                                             </td>
@@ -992,6 +1010,90 @@
                             <h2 class="text-lg font-bold text-gray-800 mb-2">DF8 Radar</h2>
                             <div class="relative" style="height: 700px;">
                                 <canvas id="df8RadarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($type === 'DF9')
+                    <!-- Section 2: DF9 Results Table -->
+                    <div class="mb-6 overflow-hidden light-card rounded-xl shadow-sm">
+                        <div class="p-4 border-b border-gray-200 bg-slate-50">
+                            <h2 class="text-xl font-bold text-green-600">Governance/Management Objectives Results</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="clean-table" id="df9ResultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Objective</th>
+                                        <th>Score</th>
+                                        <th>Baseline Score</th>
+                                        <th>Relative Importance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($results as $index => $result)
+                                        <tr>
+                                            <td>
+                                                <span class="px-3 py-1 text-sm font-black rounded
+                                                                                    @if(str_starts_with($result['code'], 'EDM')) badge-edm
+                                                                                    @elseif(str_starts_with($result['code'], 'APO')) badge-apo
+                                                                                    @elseif(str_starts_with($result['code'], 'BAI')) badge-bai
+                                                                                    @elseif(str_starts_with($result['code'], 'DSS')) badge-dss
+                                                                                    @elseif(str_starts_with($result['code'], 'MEA')) badge-mea
+                                                                                    @endif">
+                                                    {{ $result['code'] }}
+                                                </span>
+                                                <input type="hidden" name="items[{{ $index }}][code]"
+                                                    value="{{ $result['code'] }}">
+                                                <input type="hidden" name="items[{{ $index }}][score]"
+                                                    value="{{ $result['score'] }}" class="item-score-hidden">
+                                                <input type="hidden" name="items[{{ $index }}][baseline_score]"
+                                                    value="{{ $result['baseline_score'] }}" class="item-baseline-hidden">
+
+                                                @if(isset($df9Mapping[$result['code']]))
+                                                    <input type="hidden" class="item-agile-value"
+                                                        value="{{ $df9Mapping[$result['code']]['agile'] }}">
+                                                    <input type="hidden" class="item-devops-value"
+                                                        value="{{ $df9Mapping[$result['code']]['devops'] }}">
+                                                    <input type="hidden" class="item-traditional-value"
+                                                        value="{{ $df9Mapping[$result['code']]['traditional'] }}">
+                                                @endif
+
+                                                <span class="ml-2">{{ $result['name'] }}</span>
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-score-display">
+                                                {{ number_format($result['score'], 2) }}
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-baseline-display">
+                                                {{ number_format($result['baseline_score'], 2) }}
+                                            </td>
+                                            <td>
+                                                <span class="relative-importance font-black text-lg
+                                                                                    @if($result['relative_importance'] > 0) value-positive
+                                                                                    @elseif($result['relative_importance'] < 0) value-negative
+                                                                                    @else value-neutral
+                                                                                    @endif">
+                                                    {{ $result['relative_importance'] > 0 ? '+' : '' }}{{ (int) $result['relative_importance'] }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: DF9 Charts -->
+                    <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
+                        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+                            <h2 class="text-lg font-bold text-gray-800 mb-2">DF9 Output</h2>
+                            <div class="relative" style="height: 700px;">
+                                <canvas id="df9BarChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+                            <h2 class="text-lg font-bold text-gray-800 mb-2">DF9 Radar</h2>
+                            <div class="relative" style="height: 700px;">
+                                <canvas id="df9RadarChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -1019,12 +1121,12 @@
                                             <td>
                                                 <span
                                                     class="px-3 py-1 text-sm font-black rounded
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($item->code, 'EDM')) badge-edm
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'APO')) badge-apo
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'BAI')) badge-bai
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'DSS')) badge-dss
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'MEA')) badge-mea
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if(str_starts_with($item->code, 'EDM')) badge-edm
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'APO')) badge-apo
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'BAI')) badge-bai
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'DSS')) badge-dss
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif(str_starts_with($item->code, 'MEA')) badge-mea
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif">
                                                     {{ $item->code }}
                                                 </span>
                                                 <input type="hidden" name="items[{{ $index }}][code]" value="{{ $item->code }}">
@@ -1083,10 +1185,10 @@
                                             <td>
                                                 <span
                                                     class="relative-importance font-black text-lg
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if($item->relative_importance > 0) value-positive
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif($item->relative_importance < 0) value-negative
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @if($item->relative_importance > 0) value-positive
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @elseif($item->relative_importance < 0) value-negative
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @else value-neutral
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @endif"
                                                     data-index="{{ $index }}">
                                                     {{ $item->relative_importance > 0 ? '+' : '' }}{{ (int) $item->relative_importance }}
                                                 </span>
@@ -1277,6 +1379,12 @@
                 }
                 let df5BarChart = null;
                 let df5RadarChart = null;
+                let df6BarChart = null;
+                let df6RadarChart = null;
+                let df8BarChart = null;
+                let df8RadarChart = null;
+                let df9BarChart = null;
+                let df9RadarChart = null;
 
                 function initCharts() {
                     if (factorType === 'DF5') {
@@ -1448,6 +1556,72 @@
                         });
 
                         df8RadarChart = new Chart(radarCtx, {
+                            type: 'radar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Relative Importance',
+                                    data: data.map(v => v + 100),
+                                    backgroundColor: 'rgba(229, 180, 229, 0.3)',
+                                    borderColor: 'rgba(229, 180, 229, 1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: 'rgba(229, 180, 229, 1)',
+                                    pointRadius: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    r: {
+                                        min: 0, max: 200,
+                                        ticks: { stepSize: 50, callback: v => v - 100, backdropColor: 'transparent' },
+                                        pointLabels: { font: { size: 10, weight: 'bold' } }
+                                    }
+                                }
+                            }
+                        });
+                        return;
+                    }
+
+                    if (factorType === 'DF9') {
+                        const barCanvas = document.getElementById('df9BarChart');
+                        const radarCanvas = document.getElementById('df9RadarChart');
+                        if (!barCanvas || !radarCanvas) return;
+
+                        const barCtx = barCanvas.getContext('2d');
+                        const radarCtx = radarCanvas.getContext('2d');
+
+                        const results = @json($results ?? []);
+                        const labels = results.map(r => r.code);
+                        const data = results.map(r => r.relative_importance);
+
+                        df9BarChart = new Chart(barCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Relative Importance',
+                                    data: data,
+                                    backgroundColor: data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)'),
+                                    borderColor: data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)'),
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { min: -100, max: 100, grid: { color: '#e5e7eb' }, ticks: { stepSize: 25 } },
+                                    y: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
+                                }
+                            }
+                        });
+
+                        df9RadarChart = new Chart(radarCtx, {
                             type: 'radar',
                             data: {
                                 labels: labels,
@@ -1871,814 +2045,848 @@
                     });
 
                     // Only update g            eneric charts for DF types that use them (not DF5, DF6, DF8)
-                        if (!['DF5', 'DF6', 'DF8'].includes(factorType)) {
-                            updateCharts();
-                        }
+                    if (!['DF5', 'DF6', 'DF8'].includes(factorType)) {
+                        updateCharts();
+                    }
+                }
+
+                // Validation function for max value 5
+                function validateMaxValue(input) {
+                    const val = parseInt(input.value) || 0;
+                    const maxVal = 5;
+                    const minVal = 1;
+
+                    // Skip validation for DF6, DF8, DF9, and DF10 (uses percentage 0-100)
+                    if ((factorType === 'DF6' && input.classList.contains('df6-input')) ||
+                        (factorType === 'DF8' && input.classList.contains('df8-input')) ||
+                        (factorType === 'DF9' && input.classList.contains('df9-input')) ||
+                        (factorType === 'DF10' && input.classList.contains('df10-input'))) {
+                        return;
                     }
 
-                    // Validation function for max value 5
-                    function validateMaxValue(input) {
-                        const val = parseInt(input.value) || 0;
-                        const maxVal = 5;
-                        const minVal = 1;
-
-                        // Skip validation for DF6, DF8, DF9, and DF10 (uses percentage 0-100)
-                        if ((factorType === 'DF6' && input.classList.contains('df6-input')) ||
-                            (factorType === 'DF8' && input.classList.contains('df8-input')) ||
-                            (factorType === 'DF9' && input.classList.contains('df9-input')) ||
-                            (factorType === 'DF10' && input.classList.contains('df10-input'))) {
-                            return;
-                        }
-
-                        if (val > maxVal) {
-                            input.value = maxVal;
-                            showNotification(`Nilai maksimal adalah ${maxVal}. Nilai telah diubah menjadi ${maxVal}.`, 'warning');
-                        } else if (val < minVal && val !== 0) {
-                            input.value = minVal;
-                            showNotification(`Nilai minimal adalah ${minVal}. Nilai telah diubah menjadi ${minVal}.`, 'warning');
-                        }
+                    if (val > maxVal) {
+                        input.value = maxVal;
+                        showNotification(`Nilai maksimal adalah ${maxVal}. Nilai telah diubah menjadi ${maxVal}.`, 'warning');
+                    } else if (val < minVal && val !== 0) {
+                        input.value = minVal;
+                        showNotification(`Nilai minimal adalah ${minVal}. Nilai telah diubah menjadi ${minVal}.`, 'warning');
                     }
+                }
 
-                    // Show notification function
-                    function showNotification(message, type = 'info') {
-                        // Remove existing notification if any
-                        const existingNotif = document.getElementById('inputNotification');
-                        if (existingNotif) existingNotif.remove();
+                // Show notification function
+                function showNotification(message, type = 'info') {
+                    // Remove existing notification if any
+                    const existingNotif = document.getElementById('inputNotification');
+                    if (existingNotif) existingNotif.remove();
 
-                        const notification = document.createElement('div');
-                        notification.id = 'inputNotification';
-                        notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all transform ${type === 'warning' ? 'bg-yellow-500 text-white' :
-                            type === 'error' ? 'bg-red-500 text-white' :
-                                'bg-blue-500 text-white'
-                            }`;
-                        notification.innerHTML = `
-                                                                                                                                                                                                <div class="flex items-center gap-2">
-                                                                                                                                                                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                                                                                                                                                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                                                                                                                                                                                    </svg>
-                                                                                                                                                                                                    <span class="font-medium">${message}</span>
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                            `;
-                        document.body.appendChild(notification);
+                    const notification = document.createElement('div');
+                    notification.id = 'inputNotification';
+                    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all transform ${type === 'warning' ? 'bg-yellow-500 text-white' :
+                        type === 'error' ? 'bg-red-500 text-white' :
+                            'bg-blue-500 text-white'
+                        }`;
+                    notification.innerHTML = `
+                                                                                                                                                                                                                <div class="flex items-center gap-2">
+                                                                                                                                                                                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                                                                                                                                                                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                                                                                                                                                                                    </svg>
+                                                                                                                                                                                                                    <span class="font-medium">${message}</span>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                            `;
+                    document.body.appendChild(notification);
 
-                        // Auto remove after 3 seconds
-                        setTimeout(() => {
-                            notification.style.opacity = '0';
-                            setTimeout(() => notification.remove(), 300);
-                        }, 3000);
-                    }
+                    // Auto remove after 3 seconds
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                        setTimeout(() => notification.remove(), 300);
+                    }, 3000);
+                }
 
-                    importanceInputs.forEach(input => {
-                        input.addEventListener('input', function () {
-                            validateMaxValue(this);
-                            calculate();
-                        });
+                importanceInputs.forEach(input => {
+                    input.addEventListener('input', function () {
+                        validateMaxValue(this);
+                        calculate();
                     });
-                    df3Inputs.forEach(input => {
-                        input.addEventListener('input', function () {
-                            validateMaxValue(this);
-                            calculate();
-                        });
+                });
+                df3Inputs.forEach(input => {
+                    input.addEventListener('input', function () {
+                        validateMaxValue(this);
+                        calculate();
                     });
-
-                    // Specific logic for DF5
-                    if (factorType === 'DF5') {
-                        const highInput = document.getElementById('importance_high');
-                        const normalInput = document.getElementById('importance_normal');
-                        const totalPercentageDisplay = document.getElementById('totalPercentageDisplay');
-                        const validationMessage = document.getElementById('validationMessage');
-                        const saveBtnMain = document.getElementById('saveBtnMain');
-
-                        function updateSmartMessage(high, normal, total, lastTarget) {
-                            const smartBox = document.getElementById('smartMessageBoxMain');
-                            const smartIcon = document.getElementById('smartMessageIconMain');
-                            const smartContent = document.getElementById('smartMessageContentMain');
-
-                            if (!smartBox) return;
-                            smartBox.classList.remove('hidden');
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerText = 'Total sudah tepat 100%. Data siap disimpan.';
-                            } else if (total > 100) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerText = `Total (${total.toFixed(2)}%) melebihi 100%! Mohon kurangi nilai agar pas 100%.`;
-                            } else {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';
-
-                                let suggestion = '';
-                                if (lastTarget === 'high') {
-                                    const needed = 100 - high;
-                                    suggestion = `Saran: Jika 'High' diisi ${high}%, maka isi 'Normal' dengan ${needed.toFixed(2)}% agar total 100%.`;
-                                } else {
-                                    const needed = 100 - normal;
-                                    suggestion = `Saran: Jika 'Normal' diisi ${normal}%, maka isi 'High' dengan ${needed.toFixed(2)}% agar total 100%.`;
-                                }
-                                smartContent.innerText = suggestion;
-                            }
-                        }
-
-                        function updateTotalDF5(lastTarget = 'high') {
-                            const high = parseFloat(highInput.value) || 0;
-                            const normal = parseFloat(normalInput.value) || 0;
-                            const total = high + normal;
-
-                            if (totalPercentageDisplay) totalPercentageDisplay.textContent = total.toFixed(2) + '%';
-                            updateSmartMessage(high, normal, total, lastTarget);
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                if (validationMessage) validationMessage.innerHTML = '<span class="text-green-600 font-bold">✓ Valid</span>';
-                                if (saveBtnMain) {
-                                    saveBtnMain.disabled = false;
-                                    saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
-                                }
-                            } else {
-                                if (validationMessage) validationMessage.innerHTML = '<span class="text-red-600 font-bold">✗ Harus 100%</span>';
-                                if (saveBtnMain) {
-                                    saveBtnMain.disabled = true;
-                                    saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
-                                }
-                            }
-                        }
-
-                        function autoCalculateDF5() {
-                            const high = parseFloat(highInput.value) || 0;
-                            const normal = parseFloat(normalInput.value) || 0;
-
-                            fetch('{{ route('design-factors.df5.calculate') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    importance_high: high,
-                                    importance_normal: normal
-                                })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        updateDF5ResultsTable(data.results);
-                                        updateDF5Charts(data.results);
-                                    }
-                                });
-                        }
-
-                        function updateDF5ResultsTable(results) {
-                            const tbody = document.querySelector('#df5ResultsTable tbody');
-                            if (!tbody) return;
-                            tbody.innerHTML = '';
-                            results.forEach(result => {
-                                const badgeClass = getBadgeClass(result.code);
-                                const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
-                                const sign = result.relative_importance > 0 ? '+' : '';
-                                tbody.innerHTML += `
-                                                                                                                                                                                            <tr>
-                                                                                                                                                                                                <td>
-                                                                                                                                                                                                    <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
-                                                                                                                                                                                                    <span class="ml-2">${result.name}</span>
-                                                                                                                                                                                                </td>
-                                                                                                                                                                                                <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
-                                                                                                                                                                                                <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
-                                                                                                                                                                                                <td>
-                                                                                                                                                                                                    <span class="font-black text-lg ${valClass}">${sign}${Math.round(result.relative_importance)}</span>
-                                                                                                                                                                                                </td>
-                                                                                                                                                                                            </tr>
-                                                                                                                                                                                        `;
-                            });
-                        }
-
-                        function updateDF5Charts(results) {
-                            if (!df5BarChart || !df5RadarChart) return;
-                            const data = results.map(r => r.relative_importance);
-                            df5BarChart.data.datasets[0].data = data;
-                            df5BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
-                            df5BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
-                            df5BarChart.update('none');
-                            df5RadarChart.data.datasets[0].data = data.map(v => v + 100);
-                            df5RadarChart.update('none');
-                        }
-
-                        function getBadgeClass(code) {
-                            if (code.startsWith('EDM')) return 'badge-edm';
-                            if (code.startsWith('APO')) return 'badge-apo';
-                            if (code.startsWith('BAI')) return 'badge-bai';
-                            if (code.startsWith('DSS')) return 'badge-dss';
-                            if (code.startsWith('MEA')) return 'badge-mea';
-                            return '';
-                        }
-
-                        highInput.addEventListener('input', () => { updateTotalDF5('high'); autoCalculateDF5(); });
-                        normalInput.addEventListener('input', () => { updateTotalDF5('normal'); autoCalculateDF5(); });
-                    }
-
-                    // Specific logic for DF6
-                    if (factorType === 'DF6') {
-                        const highInput = document.getElementById('importance_high');
-                        const normalInput = document.getElementById('importance_normal');
-                        const lowInput = document.getElementById('importance_low');
-                        const totalPercentageDisplay = document.getElementById('totalPercentageDisplay');
-                        const validationMessage = document.getElementById('validationMessage');
-                        const saveBtnMain = document.getElementById('saveBtnMain');
-
-                        function updateSmartMessageDF6(high, normal, low, total, lastTarget) {
-                            const smartBox = document.getElementById('smartMessageBoxMain');
-                            const smartIcon = document.getElementById('smartMessageIconMain');
-                            const smartContent = document.getElementById('smartMessageContentMain');
-
-                            if (!smartBox) return;
-                            smartBox.classList.remove('hidden');
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerText = 'Total sudah tepat 100%. Data siap disimpan.';
-                            } else if (total > 100) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerText = `Total (${total.toFixed(2)}%) melebihi 100%! Mohon kurangi nilai agar pas 100%.`;
-                            } else {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';
-
-                                const remaining = 100 - total;
-                                smartContent.innerText = `Total saat ini ${total.toFixed(2)}%. Masih kurang ${remaining.toFixed(2)}% untuk mencapai 100%.`;
-                            }
-                        }
-
-                        function updateTotalDF6(lastTarget = 'high') {
-                            const high = parseFloat(highInput.value) || 0;
-                            const normal = parseFloat(normalInput.value) || 0;
-                            const low = parseFloat(lowInput.value) || 0;
-                            const total = high + normal + low;
-
-                            if (totalPercentageDisplay) totalPercentageDisplay.textContent = total.toFixed(2) + '%';
-
-                            if (validationMessage) {
-                                if (Math.abs(total - 100) < 0.01) {
-                                    validationMessage.innerHTML = '<span class="validation-success">✓ Valid</span>';
-                                } else {
-                                    validationMessage.innerHTML = '<span class="validation-error">✗ Harus 100%</span>';
-                                }
-                            }
-
-                            updateSmartMessageDF6(high, normal, low, total, lastTarget);
-                            calculate();
-                        }
-
-                        function autoCalculateDF6() {
-                            const high = parseFloat(highInput.value) || 0;
-                            const normal = parseFloat(normalInput.value) || 0;
-                            const low = parseFloat(lowInput.value) || 0;
-
-                            console.log('DF6 autoCalculate called with:', { high, normal, low });
-
-                            fetch('{{ route('design-factors.df6.calculate') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    importance_high: high,
-                                    importance_normal: normal,
-                                    importance_low: low
-                                })
-                            })
-                                .then(response => {
-                                    console.log('DF6 response status:', response.status);
-                                    return response.json();
-                                })
-                                .then(data => {
-                                    console.log('DF6 calculation data received:', data);
-                                    if (data.success) {
-                                        console.log('Updating DF6 results table with', data.results.length, 'items');
-                                        updateDF6ResultsTable(data.results);
-                                        updateDF6Charts(data.results);
-                                    } else {
-                                        console.error('DF6 calculation failed:', data);
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('DF6 AJAX error:', error);
-                                });
-                        }
-
-                        function updateDF6ResultsTable(results) {
-                            const tbody = document.querySelector('#df6ResultsTable tbody');
-                            if (!tbody) return;
-                            tbody.innerHTML = '';
-                            results.forEach(result => {
-                                const badgeClass = getBadgeClass(result.code);
-                                const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
-                                const sign = result.relative_importance > 0 ? '+' : '';
-                                tbody.innerHTML += `
-                                                                                                                                                        <tr>
-                                                                                                                                                            <td>
-                                                                                                                                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
-                                                                                                                                                                <span class="ml-2">${result.name}</span>
-                                                                                                                                                            </td>
-                                                                                                                                                            <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
-                                                                                                                                                            <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
-                                                                                                                                                            <td>
-                                                                                                                                                                <span class="relative-importance font-black text-lg ${valClass}">
-                                                                                                                                                                    ${sign}${Math.round(result.relative_importance)}
-                                                                                                                                                                </span>
-                                                                                                                                                            </td>
-                                                                                                                                                        </tr>
-                                                                                                                                                    `;
-                            });
-                        }
-
-                        function updateDF6Charts(results) {
-                            const labels = results.map(r => r.code);
-                            const data = results.map(r => r.relative_importance);
-
-                            if (df6BarChart) {
-                                df6BarChart.data.labels = labels;
-                                df6BarChart.data.datasets[0].data = data;
-                                df6BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
-                                df6BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
-                                df6BarChart.update();
-                            }
-
-                            if (df6RadarChart) {
-                                df6RadarChart.data.labels = labels;
-                                df6RadarChart.data.datasets[0].data = data.map(v => v + 100);
-                                df6RadarChart.update();
-                            }
-                        }
-
-                        function getBadgeClass(code) {
-                            if (code.startsWith('EDM')) return 'badge-edm';
-                            if (code.startsWith('APO')) return 'badge-apo';
-                            if (code.startsWith('BAI')) return 'badge-bai';
-                            if (code.startsWith('DSS')) return 'badge-dss';
-                            if (code.startsWith('MEA')) return 'badge-mea';
-                            return '';
-                        }
-
-                        highInput.addEventListener('input', () => { updateTotalDF6('high'); autoCalculateDF6(); });
-                        normalInput.addEventListener('input', () => { updateTotalDF6('normal'); autoCalculateDF6(); });
-                        lowInput.addEventListener('input', () => { updateTotalDF6('low'); autoCalculateDF6(); });
-                    }
-
-                    // Specific logic for DF8
-                    if (factorType === 'DF8') {
-                        const outsourcingInput = document.getElementById('importance_outsourcing');
-                        const cloudInput = document.getElementById('importance_cloud');
-                        const insourcedInput = document.getElementById('importance_insourced');
-                        const totalPercentageDisplay = document.getElementById('totalPercentageDisplay');
-                        const validationMessage = document.getElementById('validationMessage');
-                        const saveBtnMain = document.getElementById('saveBtnMain');
-
-                        function updateSmartMessageDF8(outsourcing, cloud, insourced, total, lastTarget) {
-                            const smartBox = document.getElementById('smartMessageBoxDF8');
-                            const smartIcon = document.getElementById('smartMessageIconDF8');
-                            const smartContent = document.getElementById('smartMessageContentDF8');
-
-                            if (!smartBox) return;
-                            smartBox.classList.remove('hidden');
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerHTML = `Total sudah tepat 100%. Data siap disimpan. Total saat ini: <strong>100%</strong>.`;
-                            } else if (total > 100) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kelebihan ${(total - 100).toFixed(2)}%).`;
-                            } else {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-
-                                const remaining = 100 - total;
-                                smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kurang ${remaining.toFixed(2)}% lagi yang harus diisi).`;
-                            }
-                        }
-
-                        function updateTotalDF8(lastTarget = 'outsourcing') {
-                            const outsourcing = parseFloat(outsourcingInput.value) || 0;
-                            const cloud = parseFloat(cloudInput.value) || 0;
-                            const insourced = parseFloat(insourcedInput.value) || 0;
-                            const total = outsourcing + cloud + insourced;
-
-                            if (totalPercentageDisplay) totalPercentageDisplay.textContent = total.toFixed(2) + '%';
-
-                            if (validationMessage) {
-                                if (Math.abs(total - 100) < 0.01) {
-                                    validationMessage.innerHTML = '<span class="text-green-600 font-bold">✓ Valid</span>';
-                                    if (saveBtnMain) {
-                                        saveBtnMain.disabled = false;
-                                        saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
-                                    }
-                                } else {
-                                    validationMessage.innerHTML = '<span class="text-red-600 font-bold">✗ Harus 100%</span>';
-                                    if (saveBtnMain) {
-                                        saveBtnMain.disabled = true;
-                                        saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
-                                    }
-                                }
-                            }
-
-                            updateSmartMessageDF8(outsourcing, cloud, insourced, total, lastTarget);
-                        }
-
-                        function autoCalculateDF8() {
-                            const outsourcing = parseFloat(outsourcingInput.value) || 0;
-                            const cloud = parseFloat(cloudInput.value) || 0;
-                            const insourced = parseFloat(insourcedInput.value) || 0;
-
-                            fetch('{{ route('design-factors.df8.calculate') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    importance_outsourcing: outsourcing,
-                                    importance_cloud: cloud,
-                                    importance_insourced: insourced
-                                })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        updateDF8ResultsTable(data.results);
-                                        updateDF8Charts(data.results);
-                                    }
-                                });
-                        }
-
-                        function updateDF8ResultsTable(results) {
-                            const tbody = document.querySelector('#df8ResultsTable tbody');
-                            if (!tbody) return;
-                            tbody.innerHTML = '';
-                            results.forEach((result, index) => {
-                                const badgeClass = getBadgeClass(result.code);
-                                const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
-                                const sign = result.relative_importance > 0 ? '+' : '';
-
-                                // Look up mapping values from existing hidden inputs if possible, or use 1 as default
-                                // In a real application, you might want these passed from the server in the AJAX response
-                                const outVal = document.querySelector(`.item-outsourcing-value[data-code="${result.code}"]`)?.value || 1;
-                                const cloudVal = document.querySelector(`.item-cloud-value[data-code="${result.code}"]`)?.value || 1;
-                                const insVal = document.querySelector(`.item-insourced-value[data-code="${result.code}"]`)?.value || 1;
-
-                                tbody.innerHTML += `
-                                                                                                                                                        <tr>
-                                                                                                                                                            <td>
-                                                                                                                                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
-                                                                                                                                                                <input type="hidden" name="items[${index}][code]" value="${result.code}">
-                                                                                                                                                                <input type="hidden" name="items[${index}][score]" value="${result.score}" class="item-score-hidden">
-                                                                                                                                                                <input type="hidden" name="items[${index}][baseline_score]" value="${result.baseline_score}" class="item-baseline-hidden">
-
-                                                                                                                                                                <input type="hidden" class="item-outsourcing-value" value="${outVal}" data-code="${result.code}">
-                                                                                                                                                                <input type="hidden" class="item-cloud-value" value="${cloudVal}" data-code="${result.code}">
-                                                                                                                                                                <input type="hidden" class="item-insourced-value" value="${insVal}" data-code="${result.code}">
-
-                                                                                                                                                                <span class="ml-2">${result.name}</span>
-                                                                                                                                                            </td>
-                                                                                                                                                            <td class="font-bold text-gray-700 item-score-display">${(result.score).toFixed(1)}</td>
-                                                                                                                                                            <td class="font-bold text-gray-700 item-baseline-display">${(result.baseline_score).toFixed(2)}</td>
-                                                                                                                                                            <td>
-                                                                                                                                                                <span class="relative-importance font-black text-lg ${valClass}">
-                                                                                                                                                                    ${sign}${Math.round(result.relative_importance)}
-                                                                                                                                                                </span>
-                                                                                                                                                            </td>
-                                                                                                                                                        </tr>
-                                                                                                                                                    `;
-                            });
-                        }
-
-                        function updateDF8Charts(results) {
-                            const labels = results.map(r => r.code);
-                            const data = results.map(r => r.relative_importance);
-
-                            if (df8BarChart) {
-                                df8BarChart.data.labels = labels;
-                                df8BarChart.data.datasets[0].data = data;
-                                df8BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
-                                df8BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
-                                df8BarChart.update();
-                            }
-
-                            if (df8RadarChart) {
-                                df8RadarChart.data.labels = labels;
-                                df8RadarChart.data.datasets[0].data = data.map(v => v + 100);
-                                df8RadarChart.update();
-                            }
-                        }
-
-                        function getBadgeClass(code) {
-                            if (code.startsWith('EDM')) return 'badge-edm';
-                            if (code.startsWith('APO')) return 'badge-apo';
-                            if (code.startsWith('BAI')) return 'badge-bai';
-                            if (code.startsWith('DSS')) return 'badge-dss';
-                            if (code.startsWith('MEA')) return 'badge-mea';
-                            return '';
-                        }
-
-                        outsourcingInput.addEventListener('input', () => { updateTotalDF8('outsourcing'); autoCalculateDF8(); });
-                        cloudInput.addEventListener('input', () => { updateTotalDF8('cloud'); autoCalculateDF8(); });
-                        insourcedInput.addEventListener('input', () => { updateTotalDF8('insourced'); autoCalculateDF8(); });
-                    }
-
-                    // Specific logic for DF9
-                    if (factorType === 'DF9') {
-                        const agileInput = document.getElementById('importance_agile');
-                        const devopsInput = document.getElementById('importance_devops');
-                        const traditionalInput = document.getElementById('importance_traditional');
-                        const totalDisplay = document.getElementById('df9TotalDisplay');
-                        const saveBtnMain = document.getElementById('saveBtnMain');
-
-                        function updateSmartMessageDF9(agile, devops, traditional, total) {
-                            const smartBox = document.getElementById('df9SmartMessageBox');
-                            const smartIcon = document.getElementById('df9SmartIcon');
-                            const smartContent = document.getElementById('df9SmartContent');
-
-                            if (!smartBox) return;
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerHTML = `Total sudah tepat 100%. Data siap disimpan. Total saat ini: <span id="df9TotalDisplay">100</span>%.`;
-                            } else if (total > 100) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini ${total.toFixed(2)}% (Kelebihan ${(total - 100).toFixed(2)}%).`;
-                            } else {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-                                const remaining = 100 - total;
-                                smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kurang ${remaining.toFixed(2)}% lagi yang harus diisi).`;
-                            }
-                        }
-
-                        function updateTotalDF9() {
-                            const agile = parseFloat(agileInput.value) || 0;
-                            const devops = parseFloat(devopsInput.value) || 0;
-                            const traditional = parseFloat(traditionalInput.value) || 0;
-                            const total = agile + devops + traditional;
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                if (saveBtnMain) {
-                                    saveBtnMain.disabled = false;
-                                    saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
-                                }
-                            } else {
-                                if (saveBtnMain) {
-                                    saveBtnMain.disabled = true;
-                                    saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
-                                }
-                            }
-
-                            updateSmartMessageDF9(agile, devops, traditional, total);
-                        }
-
-                        function autoCalculateDF9() {
-                            const agile = parseFloat(agileInput.value) || 0;
-                            const devops = parseFloat(devopsInput.value) || 0;
-                            const traditional = parseFloat(traditionalInput.value) || 0;
-
-                            fetch('{{ route('design-factors.df9.calculate') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    importance_agile: agile,
-                                    importance_devops: devops,
-                                    importance_traditional: traditional
-                                })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        updateDF9ResultsTable(data.results);
-                                        if (window.df9BarChart) updateDF9Charts(data.results);
-                                        else calculate(); // Fallback to global calculate if charts not ready
-                                    }
-                                });
-                        }
-
-                        function updateDF9ResultsTable(results) {
-                            const table = document.querySelector('.clean-table');
-                            if (!table) return;
-                            const rows = table.querySelectorAll('tbody tr');
-                            results.forEach((result, idx) => {
-                                const row = rows[idx];
-                                if (row) {
-                                    const scoreDisplay = row.querySelector('.item-score-display');
-                                    const baseDisplay = row.querySelector('.item-baseline-display');
-                                    const relImp = row.querySelector('.relative-importance');
-
-                                    if (scoreDisplay) scoreDisplay.textContent = result.score.toFixed(2);
-                                    if (baseDisplay) baseDisplay.textContent = result.baseline_score.toFixed(2);
-                                    if (relImp) {
-                                        relImp.textContent = (result.relative_importance > 0 ? '+' : '') + Math.round(result.relative_importance);
-                                        relImp.className = 'relative-importance font-black text-lg ' +
-                                            (result.relative_importance > 0 ? 'value-positive' :
-                                                (result.relative_importance < 0 ? 'value-negative' : 'value-neutral'));
-                                    }
-                                }
-                            });
-                        }
-
-                        function updateDF9Charts(results) {
-                            // Update global chart data if needed, or if factor-specific charts exist
-                            calculate();
-                        }
-
-                        agileInput.addEventListener('input', () => { updateTotalDF9(); autoCalculateDF9(); });
-                        devopsInput.addEventListener('input', () => { updateTotalDF9(); autoCalculateDF9(); });
-                        traditionalInput.addEventListener('input', () => { updateTotalDF9(); autoCalculateDF9(); });
-                    }
-
-                    // Specific logic for DF10
-                    if (factorType === 'DF10') {
-                        const firstMoverInput = document.getElementById('importance_first_mover');
-                        const followerInput = document.getElementById('importance_follower');
-                        const slowAdopterInput = document.getElementById('importance_slow_adopter');
-                        const totalDisplay = document.getElementById('df10TotalDisplay');
-                        const saveBtnMain = document.getElementById('saveBtnMain');
-
-                        function updateSmartMessageDF10(fm, f, sa, total) {
-                            const smartBox = document.getElementById('df10SmartMessageBox');
-                            const smartIcon = document.getElementById('df10SmartIcon');
-                            const smartContent = document.getElementById('df10SmartContent');
-
-                            if (!smartBox) return;
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerHTML = `Total sudah tepat 100%. Data siap disimpan. Total saat ini: <span id="df10TotalDisplay">100</span>%.`;
-                            } else if (total > 100) {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-                                smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini ${total.toFixed(2)}% (Kelebihan ${(total - 100).toFixed(2)}%).`;
-                            } else {
-                                smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
-                                smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
-                                const remaining = 100 - total;
-                                smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kurang ${remaining.toFixed(2)}% lagi yang harus diisi).`;
-                            }
-                        }
-
-                        function updateTotalDF10() {
-                            const fm = parseFloat(firstMoverInput.value) || 0;
-                            const f = parseFloat(followerInput.value) || 0;
-                            const sa = parseFloat(slowAdopterInput.value) || 0;
-                            const total = fm + f + sa;
-
-                            if (Math.abs(total - 100) < 0.01) {
-                                if (saveBtnMain) {
-                                    saveBtnMain.disabled = false;
-                                    saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
-                                }
-                            } else {
-                                if (saveBtnMain) {
-                                    saveBtnMain.disabled = true;
-                                    saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
-                                }
-                            }
-
-                            updateSmartMessageDF10(fm, f, sa, total);
-                        }
-
-                        function autoCalculateDF10() {
-                            const fm = parseFloat(firstMoverInput.value) || 0;
-                            const f = parseFloat(followerInput.value) || 0;
-                            const sa = parseFloat(slowAdopterInput.value) || 0;
-
-                            fetch('{{ route('design-factors.df10.calculate') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    importance_first_mover: fm,
-                                    importance_follower: f,
-                                    importance_slow_adopter: sa
-                                })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        updateDF10ResultsTable(data.results);
-                                        calculate(); // Sync global charts
-                                    }
-                                });
-                        }
-
-                        function updateDF10ResultsTable(results) {
-                            const table = document.querySelector('.clean-table');
-                            if (!table) return;
-                            const rows = table.querySelectorAll('tbody tr');
-                            results.forEach((result, idx) => {
-                                const row = rows[idx];
-                                if (row) {
-                                    const scoreDisplay = row.querySelector('.item-score-display');
-                                    const baseDisplay = row.querySelector('.item-baseline-display');
-                                    const relImp = row.querySelector('.relative-importance');
-
-                                    if (scoreDisplay) scoreDisplay.textContent = result.score.toFixed(2);
-                                    if (baseDisplay) baseDisplay.textContent = result.baseline_score.toFixed(2);
-                                    if (relImp) {
-                                        relImp.textContent = (result.relative_importance > 0 ? '+' : '') + Math.round(result.relative_importance);
-                                        relImp.className = 'relative-importance font-black text-lg ' +
-                                            (result.relative_importance > 0 ? 'value-positive' :
-                                                (result.relative_importance < 0 ? 'value-negative' : 'value-neutral'));
-                                    }
-                                }
-                            });
-                        }
-
-                        firstMoverInput.addEventListener('input', () => { updateTotalDF10(); autoCalculateDF10(); });
-                        followerInput.addEventListener('input', () => { updateTotalDF10(); autoCalculateDF10(); });
-                        slowAdopterInput.addEventListener('input', () => { updateTotalDF10(); autoCalculateDF10(); });
-                    }
-
-                    initCharts();
-                    calculate();
-
-                    // Initial DF5 update if applicable
-                    if (factorType === 'DF5') {
-                        updateTotalDF5();
-                    }
-
-                    // Initial DF6 update if applicable
-                    if (factorType === 'DF6') {
-                        updateTotalDF6();
-                        autoCalculateDF6();
-                    }
-
-                    // Initial DF8 update if applicable
-                    if (factorType === 'DF8') {
-                        updateTotalDF8();
-                        autoCalculateDF8();
-                    }
-
-                    // Initial DF9 update if applicable
-                    if (factorType === 'DF9') {
-                        updateTotalDF9();
-                        autoCalculateDF9();
-                    }
-
-                    // Initial DF10 update if applicable
-                    if (factorType === 'DF10') {
-                        updateTotalDF10();
-                        autoCalculateDF10();
-                    }
                 });
 
-                // Reset All Button Event Listener
-                const resetAllBtn = document.getElementById('resetAllBtn');
-                console.log('Reset button element:', resetAllBtn);
+                // Specific logic for DF5
+                if (factorType === 'DF5') {
+                    const highInput = document.getElementById('importance_high');
+                    const normalInput = document.getElementById('importance_normal');
+                    const totalPercentageDisplay = document.getElementById('totalPercentageDisplay');
+                    const validationMessage = document.getElementById('validationMessage');
+                    const saveBtnMain = document.getElementById('saveBtnMain');
 
-                if (resetAllBtn) {
-                    console.log('Attaching click event to reset button');
-                    resetAllBtn.addEventListener('click', function () {
-                        console.log('Reset button clicked!');
-                        Swal.fire({
-                            title: 'Reset Semua Design Factor?',
-                            text: "Seluruh data DF1 hingga DF10 akan dihapus secara permanen!",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#3085d6',
-                            confirmButtonText: 'Ya, Reset Semua!',
-                            cancelButtonText: 'Batal'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                console.log('User confirmed reset');
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = '{{ route('design-factors.reset-all') }}';
+                    function updateSmartMessage(high, normal, total, lastTarget) {
+                        const smartBox = document.getElementById('smartMessageBoxMain');
+                        const smartIcon = document.getElementById('smartMessageIconMain');
+                        const smartContent = document.getElementById('smartMessageContentMain');
 
-                                const csrfToken = document.createElement('input');
-                                csrfToken.type = 'hidden';
-                                csrfToken.name = '_token';
-                                csrfToken.value = '{{ csrf_token() }}';
-                                form.appendChild(csrfToken);
+                        if (!smartBox) return;
+                        smartBox.classList.remove('hidden');
 
-                                document.body.appendChild(form);
-                                form.submit();
+                        if (Math.abs(total - 100) < 0.01) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerText = 'Total sudah tepat 100%. Data siap disimpan.';
+                        } else if (total > 100) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerText = `Total (${total.toFixed(2)}%) melebihi 100%! Mohon kurangi nilai agar pas 100%.`;
+                        } else {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';
+
+                            let suggestion = '';
+                            if (lastTarget === 'high') {
+                                const needed = 100 - high;
+                                suggestion = `Saran: Jika 'High' diisi ${high}%, maka isi 'Normal' dengan ${needed.toFixed(2)}% agar total 100%.`;
                             } else {
-                                console.log('User cancelled reset');
+                                const needed = 100 - normal;
+                                suggestion = `Saran: Jika 'Normal' diisi ${normal}%, maka isi 'High' dengan ${needed.toFixed(2)}% agar total 100%.`;
+                            }
+                            smartContent.innerText = suggestion;
+                        }
+                    }
+
+                    function updateTotalDF5(lastTarget = 'high') {
+                        const high = parseFloat(highInput.value) || 0;
+                        const normal = parseFloat(normalInput.value) || 0;
+                        const total = high + normal;
+
+                        if (totalPercentageDisplay) totalPercentageDisplay.textContent = total.toFixed(2) + '%';
+                        updateSmartMessage(high, normal, total, lastTarget);
+
+                        if (Math.abs(total - 100) < 0.01) {
+                            if (validationMessage) validationMessage.innerHTML = '<span class="text-green-600 font-bold">✓ Valid</span>';
+                            if (saveBtnMain) {
+                                saveBtnMain.disabled = false;
+                                saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        } else {
+                            if (validationMessage) validationMessage.innerHTML = '<span class="text-red-600 font-bold">✗ Harus 100%</span>';
+                            if (saveBtnMain) {
+                                saveBtnMain.disabled = true;
+                                saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                        }
+                    }
+
+                    function autoCalculateDF5() {
+                        const high = parseFloat(highInput.value) || 0;
+                        const normal = parseFloat(normalInput.value) || 0;
+
+                        fetch('{{ route('design-factors.df5.calculate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                importance_high: high,
+                                importance_normal: normal
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    updateDF5ResultsTable(data.results);
+                                    updateDF5Charts(data.results);
+                                }
+                            });
+                    }
+
+                    function updateDF5ResultsTable(results) {
+                        const tbody = document.querySelector('#df5ResultsTable tbody');
+                        if (!tbody) return;
+                        tbody.innerHTML = '';
+                        results.forEach(result => {
+                            const badgeClass = getBadgeClass(result.code);
+                            const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
+                            const sign = result.relative_importance > 0 ? '+' : '';
+                            tbody.innerHTML += `
+                                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                                <td>
+                                                                                                                                                                                                                    <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                                                                                                                                                                                    <span class="ml-2">${result.name}</span>
+                                                                                                                                                                                                                </td>
+                                                                                                                                                                                                                <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
+                                                                                                                                                                                                                <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
+                                                                                                                                                                                                                <td>
+                                                                                                                                                                                                                    <span class="font-black text-lg ${valClass}">${sign}${Math.round(result.relative_importance)}</span>
+                                                                                                                                                                                                                </td>
+                                                                                                                                                                                                            </tr>
+                                                                                                                                                                                                        `;
+                        });
+                    }
+
+                    function updateDF5Charts(results) {
+                        if (!df5BarChart || !df5RadarChart) return;
+                        const data = results.map(r => r.relative_importance);
+                        df5BarChart.data.datasets[0].data = data;
+                        df5BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
+                        df5BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
+                        df5BarChart.update('none');
+                        df5RadarChart.data.datasets[0].data = data.map(v => v + 100);
+                        df5RadarChart.update('none');
+                    }
+
+                    function getBadgeClass(code) {
+                        if (code.startsWith('EDM')) return 'badge-edm';
+                        if (code.startsWith('APO')) return 'badge-apo';
+                        if (code.startsWith('BAI')) return 'badge-bai';
+                        if (code.startsWith('DSS')) return 'badge-dss';
+                        if (code.startsWith('MEA')) return 'badge-mea';
+                        return '';
+                    }
+
+                    highInput.addEventListener('input', () => { updateTotalDF5('high'); autoCalculateDF5(); });
+                    normalInput.addEventListener('input', () => { updateTotalDF5('normal'); autoCalculateDF5(); });
+                }
+
+                // Specific logic for DF6
+                if (factorType === 'DF6') {
+                    const highInput = document.getElementById('importance_high');
+                    const normalInput = document.getElementById('importance_normal');
+                    const lowInput = document.getElementById('importance_low');
+                    const totalPercentageDisplay = document.getElementById('totalPercentageDisplay');
+                    const validationMessage = document.getElementById('validationMessage');
+                    const saveBtnMain = document.getElementById('saveBtnMain');
+
+                    function updateSmartMessageDF6(high, normal, low, total, lastTarget) {
+                        const smartBox = document.getElementById('smartMessageBoxMain');
+                        const smartIcon = document.getElementById('smartMessageIconMain');
+                        const smartContent = document.getElementById('smartMessageContentMain');
+
+                        if (!smartBox) return;
+                        smartBox.classList.remove('hidden');
+
+                        if (Math.abs(total - 100) < 0.01) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerText = 'Total sudah tepat 100%. Data siap disimpan.';
+                        } else if (total > 100) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerText = `Total (${total.toFixed(2)}%) melebihi 100%! Mohon kurangi nilai agar pas 100%.`;
+                        } else {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>';
+
+                            const remaining = 100 - total;
+                            smartContent.innerText = `Total saat ini ${total.toFixed(2)}%. Masih kurang ${remaining.toFixed(2)}% untuk mencapai 100%.`;
+                        }
+                    }
+
+                    function updateTotalDF6(lastTarget = 'high') {
+                        const high = parseFloat(highInput.value) || 0;
+                        const normal = parseFloat(normalInput.value) || 0;
+                        const low = parseFloat(lowInput.value) || 0;
+                        const total = high + normal + low;
+
+                        if (totalPercentageDisplay) totalPercentageDisplay.textContent = total.toFixed(2) + '%';
+
+                        if (validationMessage) {
+                            if (Math.abs(total - 100) < 0.01) {
+                                validationMessage.innerHTML = '<span class="validation-success">✓ Valid</span>';
+                            } else {
+                                validationMessage.innerHTML = '<span class="validation-error">✗ Harus 100%</span>';
+                            }
+                        }
+
+                        updateSmartMessageDF6(high, normal, low, total, lastTarget);
+                        calculate();
+                    }
+
+                    function autoCalculateDF6() {
+                        const high = parseFloat(highInput.value) || 0;
+                        const normal = parseFloat(normalInput.value) || 0;
+                        const low = parseFloat(lowInput.value) || 0;
+
+                        console.log('DF6 autoCalculate called with:', { high, normal, low });
+
+                        fetch('{{ route('design-factors.df6.calculate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                importance_high: high,
+                                importance_normal: normal,
+                                importance_low: low
+                            })
+                        })
+                            .then(response => {
+                                console.log('DF6 response status:', response.status);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('DF6 calculation data received:', data);
+                                if (data.success) {
+                                    console.log('Updating DF6 results table with', data.results.length, 'items');
+                                    updateDF6ResultsTable(data.results);
+                                    updateDF6Charts(data.results);
+                                } else {
+                                    console.error('DF6 calculation failed:', data);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('DF6 AJAX error:', error);
+                            });
+                    }
+
+                    function updateDF6ResultsTable(results) {
+                        const tbody = document.querySelector('#df6ResultsTable tbody');
+                        if (!tbody) return;
+                        tbody.innerHTML = '';
+                        results.forEach(result => {
+                            const badgeClass = getBadgeClass(result.code);
+                            const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
+                            const sign = result.relative_importance > 0 ? '+' : '';
+                            tbody.innerHTML += `
+                                                                                                                                                                        <tr>
+                                                                                                                                                                            <td>
+                                                                                                                                                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                                                                                                                                                <span class="ml-2">${result.name}</span>
+                                                                                                                                                                            </td>
+                                                                                                                                                                            <td class="font-bold text-gray-700">${(result.score / 100).toFixed(2)}</td>
+                                                                                                                                                                            <td class="font-bold text-gray-700">${(result.baseline_score / 100).toFixed(2)}</td>
+                                                                                                                                                                            <td>
+                                                                                                                                                                                <span class="relative-importance font-black text-lg ${valClass}">
+                                                                                                                                                                                    ${sign}${Math.round(result.relative_importance)}
+                                                                                                                                                                                </span>
+                                                                                                                                                                            </td>
+                                                                                                                                                                        </tr>
+                                                                                                                                                                    `;
+                        });
+                    }
+
+                    function updateDF6Charts(results) {
+                        const labels = results.map(r => r.code);
+                        const data = results.map(r => r.relative_importance);
+
+                        if (df6BarChart) {
+                            df6BarChart.data.labels = labels;
+                            df6BarChart.data.datasets[0].data = data;
+                            df6BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
+                            df6BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
+                            df6BarChart.update();
+                        }
+
+                        if (df6RadarChart) {
+                            df6RadarChart.data.labels = labels;
+                            df6RadarChart.data.datasets[0].data = data.map(v => v + 100);
+                            df6RadarChart.update();
+                        }
+                    }
+
+                    function getBadgeClass(code) {
+                        if (code.startsWith('EDM')) return 'badge-edm';
+                        if (code.startsWith('APO')) return 'badge-apo';
+                        if (code.startsWith('BAI')) return 'badge-bai';
+                        if (code.startsWith('DSS')) return 'badge-dss';
+                        if (code.startsWith('MEA')) return 'badge-mea';
+                        return '';
+                    }
+
+                    highInput.addEventListener('input', () => { updateTotalDF6('high'); autoCalculateDF6(); });
+                    normalInput.addEventListener('input', () => { updateTotalDF6('normal'); autoCalculateDF6(); });
+                    lowInput.addEventListener('input', () => { updateTotalDF6('low'); autoCalculateDF6(); });
+                }
+
+                // Specific logic for DF8
+                if (factorType === 'DF8') {
+                    const outsourcingInput = document.getElementById('importance_outsourcing');
+                    const cloudInput = document.getElementById('importance_cloud');
+                    const insourcedInput = document.getElementById('importance_insourced');
+                    const totalPercentageDisplay = document.getElementById('totalPercentageDisplay');
+                    const validationMessage = document.getElementById('validationMessage');
+                    const saveBtnMain = document.getElementById('saveBtnMain');
+
+                    function updateSmartMessageDF8(outsourcing, cloud, insourced, total, lastTarget) {
+                        const smartBox = document.getElementById('smartMessageBoxDF8');
+                        const smartIcon = document.getElementById('smartMessageIconDF8');
+                        const smartContent = document.getElementById('smartMessageContentDF8');
+
+                        if (!smartBox) return;
+                        smartBox.classList.remove('hidden');
+
+                        if (Math.abs(total - 100) < 0.01) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerHTML = `Total sudah tepat 100%. Data siap disimpan. Total saat ini: <strong>100%</strong>.`;
+                        } else if (total > 100) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kelebihan ${(total - 100).toFixed(2)}%).`;
+                        } else {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+
+                            const remaining = 100 - total;
+                            smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kurang ${remaining.toFixed(2)}% lagi yang harus diisi).`;
+                        }
+                    }
+
+                    function updateTotalDF8(lastTarget = 'outsourcing') {
+                        const outsourcing = parseFloat(outsourcingInput.value) || 0;
+                        const cloud = parseFloat(cloudInput.value) || 0;
+                        const insourced = parseFloat(insourcedInput.value) || 0;
+                        const total = outsourcing + cloud + insourced;
+
+                        if (totalPercentageDisplay) totalPercentageDisplay.textContent = total.toFixed(2) + '%';
+
+                        if (validationMessage) {
+                            if (Math.abs(total - 100) < 0.01) {
+                                validationMessage.innerHTML = '<span class="text-green-600 font-bold">✓ Valid</span>';
+                                if (saveBtnMain) {
+                                    saveBtnMain.disabled = false;
+                                    saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
+                                }
+                            } else {
+                                validationMessage.innerHTML = '<span class="text-red-600 font-bold">✗ Harus 100%</span>';
+                                if (saveBtnMain) {
+                                    saveBtnMain.disabled = true;
+                                    saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
+                                }
+                            }
+                        }
+
+                        updateSmartMessageDF8(outsourcing, cloud, insourced, total, lastTarget);
+                    }
+
+                    function autoCalculateDF8() {
+                        const outsourcing = parseFloat(outsourcingInput.value) || 0;
+                        const cloud = parseFloat(cloudInput.value) || 0;
+                        const insourced = parseFloat(insourcedInput.value) || 0;
+
+                        fetch('{{ route('design-factors.df8.calculate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                importance_outsourcing: outsourcing,
+                                importance_cloud: cloud,
+                                importance_insourced: insourced
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    updateDF8ResultsTable(data.results);
+                                    updateDF8Charts(data.results);
+                                }
+                            });
+                    }
+
+                    function updateDF8ResultsTable(results) {
+                        const tbody = document.querySelector('#df8ResultsTable tbody');
+                        if (!tbody) return;
+                        tbody.innerHTML = '';
+                        results.forEach((result, index) => {
+                            const badgeClass = getBadgeClass(result.code);
+                            const valClass = result.relative_importance > 0 ? 'value-positive' : (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
+                            const sign = result.relative_importance > 0 ? '+' : '';
+
+                            // Look up mapping values from existing hidden inputs if possible, or use 1 as default
+                            // In a real application, you might want these passed from the server in the AJAX response
+                            const outVal = document.querySelector(`.item-outsourcing-value[data-code="${result.code}"]`)?.value || 1;
+                            const cloudVal = document.querySelector(`.item-cloud-value[data-code="${result.code}"]`)?.value || 1;
+                            const insVal = document.querySelector(`.item-insourced-value[data-code="${result.code}"]`)?.value || 1;
+
+                            tbody.innerHTML += `
+                                                                                                                                                                        <tr>
+                                                                                                                                                                            <td>
+                                                                                                                                                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                                                                                                                                                <input type="hidden" name="items[${index}][code]" value="${result.code}">
+                                                                                                                                                                                <input type="hidden" name="items[${index}][score]" value="${result.score}" class="item-score-hidden">
+                                                                                                                                                                                <input type="hidden" name="items[${index}][baseline_score]" value="${result.baseline_score}" class="item-baseline-hidden">
+
+                                                                                                                                                                                <input type="hidden" class="item-outsourcing-value" value="${outVal}" data-code="${result.code}">
+                                                                                                                                                                                <input type="hidden" class="item-cloud-value" value="${cloudVal}" data-code="${result.code}">
+                                                                                                                                                                                <input type="hidden" class="item-insourced-value" value="${insVal}" data-code="${result.code}">
+
+                                                                                                                                                                                <span class="ml-2">${result.name}</span>
+                                                                                                                                                                            </td>
+                                                                                                                                                                            <td class="font-bold text-gray-700 item-score-display">${(result.score).toFixed(1)}</td>
+                                                                                                                                                                            <td class="font-bold text-gray-700 item-baseline-display">${(result.baseline_score).toFixed(2)}</td>
+                                                                                                                                                                            <td>
+                                                                                                                                                                                <span class="relative-importance font-black text-lg ${valClass}">
+                                                                                                                                                                                    ${sign}${Math.round(result.relative_importance)}
+                                                                                                                                                                                </span>
+                                                                                                                                                                            </td>
+                                                                                                                                                                        </tr>
+                                                                                                                                                                    `;
+                        });
+                    }
+
+                    function updateDF8Charts(results) {
+                        const labels = results.map(r => r.code);
+                        const data = results.map(r => r.relative_importance);
+
+                        if (df8BarChart) {
+                            df8BarChart.data.labels = labels;
+                            df8BarChart.data.datasets[0].data = data;
+                            df8BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
+                            df8BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
+                            df8BarChart.update();
+                        }
+
+                        if (df8RadarChart) {
+                            df8RadarChart.data.labels = labels;
+                            df8RadarChart.data.datasets[0].data = data.map(v => v + 100);
+                            df8RadarChart.update();
+                        }
+                    }
+
+                    function getBadgeClass(code) {
+                        if (code.startsWith('EDM')) return 'badge-edm';
+                        if (code.startsWith('APO')) return 'badge-apo';
+                        if (code.startsWith('BAI')) return 'badge-bai';
+                        if (code.startsWith('DSS')) return 'badge-dss';
+                        if (code.startsWith('MEA')) return 'badge-mea';
+                        return '';
+                    }
+
+                    outsourcingInput.addEventListener('input', () => { updateTotalDF8('outsourcing'); autoCalculateDF8(); });
+                    cloudInput.addEventListener('input', () => { updateTotalDF8('cloud'); autoCalculateDF8(); });
+                    insourcedInput.addEventListener('input', () => { updateTotalDF8('insourced'); autoCalculateDF8(); });
+                }
+
+                // Specific logic for DF9
+                if (factorType === 'DF9') {
+                    const agileInput = document.getElementById('importance_agile');
+                    const devopsInput = document.getElementById('importance_devops');
+                    const traditionalInput = document.getElementById('importance_traditional');
+                    const totalDisplay = document.getElementById('df9TotalDisplay');
+                    const saveBtnMain = document.getElementById('saveBtnMain');
+
+                    function updateSmartMessageDF9(agile, devops, traditional, total) {
+                        const smartBox = document.getElementById('df9SmartMessageBox');
+                        const smartIcon = document.getElementById('df9SmartIcon');
+                        const smartContent = document.getElementById('df9SmartContent');
+
+                        if (!smartBox) return;
+
+                        if (Math.abs(total - 100) < 0.01) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerHTML = `Total sudah tepat 100%. Data siap disimpan. Total saat ini: <span id="df9TotalDisplay">100</span>%.`;
+                        } else if (total > 100) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini ${total.toFixed(2)}% (Kelebihan ${(total - 100).toFixed(2)}%).`;
+                        } else {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                            const remaining = 100 - total;
+                            smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kurang ${remaining.toFixed(2)}% lagi yang harus diisi).`;
+                        }
+                    }
+
+                    function updateTotalDF9() {
+                        const agile = parseFloat(agileInput.value) || 0;
+                        const devops = parseFloat(devopsInput.value) || 0;
+                        const traditional = parseFloat(traditionalInput.value) || 0;
+                        const total = agile + devops + traditional;
+
+                        if (Math.abs(total - 100) < 0.01) {
+                            if (saveBtnMain) {
+                                saveBtnMain.disabled = false;
+                                saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        } else {
+                            if (saveBtnMain) {
+                                saveBtnMain.disabled = true;
+                                saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                        }
+
+                        updateSmartMessageDF9(agile, devops, traditional, total);
+                    }
+
+                    function autoCalculateDF9() {
+                        const agile = parseFloat(agileInput.value) || 0;
+                        const devops = parseFloat(devopsInput.value) || 0;
+                        const traditional = parseFloat(traditionalInput.value) || 0;
+
+                        fetch('{{ route('design-factors.df9.calculate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                importance_agile: agile,
+                                importance_devops: devops,
+                                importance_traditional: traditional
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    updateDF9ResultsTable(data.results);
+                                    if (window.df9BarChart) updateDF9Charts(data.results);
+                                    else calculate(); // Fallback to global calculate if charts not ready
+                                }
+                            });
+                    }
+
+                    function updateDF9ResultsTable(results) {
+                        const tbody = document.querySelector('#df9ResultsTable tbody');
+                        if (!tbody) return;
+
+                        // We need to match results to existing rows or rebuild them
+                        // Rebuilding is safer to ensure order
+                        tbody.innerHTML = '';
+
+                        results.forEach((result, idx) => {
+                            const badgeClass = result.code.startsWith('EDM') ? 'badge-edm' :
+                                (result.code.startsWith('APO') ? 'badge-apo' :
+                                    (result.code.startsWith('BAI') ? 'badge-bai' :
+                                        (result.code.startsWith('DSS') ? 'badge-dss' : 'badge-mea')));
+
+                            const valClass = result.relative_importance > 0 ? 'value-positive' :
+                                (result.relative_importance < 0 ? 'value-negative' : 'value-neutral');
+                            const sign = result.relative_importance > 0 ? '+' : '';
+
+                            // Get hidden values for next calculation round (preserve inputs)
+                            // Note: In a complete implementation we'd fetch these or cache them
+                            // For now we assume they are unused for display, or we can look them up
+
+                            tbody.innerHTML += `
+                                        <tr>
+                                            <td>
+                                                <span class="px-3 py-1 text-sm font-black rounded ${badgeClass}">${result.code}</span>
+                                                <input type="hidden" name="items[${idx}][code]" value="${result.code}">
+                                                <input type="hidden" name="items[${idx}][score]" value="${result.score}">
+                                                <input type="hidden" name="items[${idx}][baseline_score]" value="${result.baseline_score}">
+                                                <span class="ml-2">${result.name}</span>
+                                            </td>
+                                            <td class="font-bold text-gray-700 item-score-display">${result.score.toFixed(2)}</td>
+                                            <td class="font-bold text-gray-700 item-baseline-display">${result.baseline_score.toFixed(2)}</td>
+                                            <td>
+                                                <span class="relative-importance font-black text-lg ${valClass}">
+                                                    ${sign}${Math.round(result.relative_importance)}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                     `;
+                        });
+                    }
+
+                    function updateDF9Charts(results) {
+                        const labels = results.map(r => r.code);
+                        const data = results.map(r => r.relative_importance);
+
+                        if (df9BarChart) {
+                            df9BarChart.data.labels = labels;
+                            df9BarChart.data.datasets[0].data = data;
+                            df9BarChart.data.datasets[0].backgroundColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 0.7)' : 'rgba(192, 0, 0, 0.7)');
+                            df9BarChart.data.datasets[0].borderColor = data.map(v => v >= 0 ? 'rgba(79, 124, 53, 1)' : 'rgba(192, 0, 0, 1)');
+                            df9BarChart.update();
+                        }
+
+                        if (df9RadarChart) {
+                            df9RadarChart.data.labels = labels;
+                            df9RadarChart.data.datasets[0].data = data.map(v => v + 100);
+                            df9RadarChart.update();
+                        }
+                    }
+
+                    agileInput.addEventListener('input', () => { updateTotalDF9(); autoCalculateDF9(); });
+                    devopsInput.addEventListener('input', () => { updateTotalDF9(); autoCalculateDF9(); });
+                    traditionalInput.addEventListener('input', () => { updateTotalDF9(); autoCalculateDF9(); });
+                }
+
+                // Specific logic for DF10
+                if (factorType === 'DF10') {
+                    const firstMoverInput = document.getElementById('importance_first_mover');
+                    const followerInput = document.getElementById('importance_follower');
+                    const slowAdopterInput = document.getElementById('importance_slow_adopter');
+                    const totalDisplay = document.getElementById('df10TotalDisplay');
+                    const saveBtnMain = document.getElementById('saveBtnMain');
+
+                    function updateSmartMessageDF10(fm, f, sa, total) {
+                        const smartBox = document.getElementById('df10SmartMessageBox');
+                        const smartIcon = document.getElementById('df10SmartIcon');
+                        const smartContent = document.getElementById('df10SmartContent');
+
+                        if (!smartBox) return;
+
+                        if (Math.abs(total - 100) < 0.01) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-green-50 border-green-200 text-green-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerHTML = `Total sudah tepat 100%. Data siap disimpan. Total saat ini: <span id="df10TotalDisplay">100</span>%.`;
+                        } else if (total > 100) {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                            smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini ${total.toFixed(2)}% (Kelebihan ${(total - 100).toFixed(2)}%).`;
+                        } else {
+                            smartBox.className = 'mb-4 p-3 rounded-lg border bg-red-50 border-red-200 text-red-800';
+                            smartIcon.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                            const remaining = 100 - total;
+                            smartContent.innerHTML = `Nilai harus 100%, tidak boleh kurang atau lebih! Total saat ini <strong>${total.toFixed(2)}%</strong> (Kurang ${remaining.toFixed(2)}% lagi yang harus diisi).`;
+                        }
+                    }
+
+                    function updateTotalDF10() {
+                        const fm = parseFloat(firstMoverInput.value) || 0;
+                        const f = parseFloat(followerInput.value) || 0;
+                        const sa = parseFloat(slowAdopterInput.value) || 0;
+                        const total = fm + f + sa;
+
+                        if (Math.abs(total - 100) < 0.01) {
+                            if (saveBtnMain) {
+                                saveBtnMain.disabled = false;
+                                saveBtnMain.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        } else {
+                            if (saveBtnMain) {
+                                saveBtnMain.disabled = true;
+                                saveBtnMain.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                        }
+
+                        updateSmartMessageDF10(fm, f, sa, total);
+                    }
+
+                    function autoCalculateDF10() {
+                        const fm = parseFloat(firstMoverInput.value) || 0;
+                        const f = parseFloat(followerInput.value) || 0;
+                        const sa = parseFloat(slowAdopterInput.value) || 0;
+
+                        fetch('{{ route('design-factors.df10.calculate') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                importance_first_mover: fm,
+                                importance_follower: f,
+                                importance_slow_adopter: sa
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    updateDF10ResultsTable(data.results);
+                                    calculate(); // Sy        nc global charts
+                                }
+                            });
+                    }
+
+                    function updateDF10ResultsTable(results) {
+                        const table = document.querySelector('.clean-table');
+                        if (!table) return;
+                        const rows = table.querySelectorAll('tbody tr');
+                        results.forEach((result, idx) => {
+                            const row = rows[idx];
+                            if (row) {
+                                const scoreDisplay = row.querySelector('.item-score-display');
+                                const baseDisplay = row.querySelector('.item-baseline-display');
+                                const relImp = row.querySelector('.relative-importance');
+
+                                if (scoreDisplay) scoreDisplay.textContent = result.score.toFixed(2);
+                                if (baseDisplay) baseDisplay.textContent = result.baseline_score.toFixed(2);
+                                if (relImp) {
+                                    relImp.textContent = (result.relative_importance > 0 ? '+' : '') + Math.round(result.relative_importance);
+                                    relImp.className = 'relative-importance font-black text-lg ' +
+                                        (result.relative_importance > 0 ? 'value-positive' :
+                                            (result.relative_importance < 0 ? 'value-negative' : 'value-neutral'));
+                                }
                             }
                         });
-                    });
-                } else {
-                    console.error('Reset button not found! Button might be hidden or not rendered.');
+                    }
+
+                    firstMoverInput.addEventListener('input', () => { updateTotalDF10(); autoCalculateDF10(); });
+                    followerInput.addEventListener('input', () => { updateTotalDF10(); autoCalculateDF10(); });
+                    slowAdopterInput.addEventListener('input', () => { updateTotalDF10(); autoCalculateDF10(); });
                 }
-            </script>
+
+                initCharts();
+                calculate();
+
+                // Initial DF5 update if applicable
+                if (factorType === 'DF5') {
+                    updateTotalDF5();
+                }
+
+                // Initial DF6 update if applicable
+                if (factorType === 'DF6') {
+                    updateTotalDF6();
+                    autoCalculateDF6();
+                }
+
+                // Initial DF8 update if applicable
+                if (factorType === 'DF8') {
+                    updateTotalDF8();
+                    autoCalculateDF8();
+                }
+
+                // Initial DF9 update if applicable
+                if (factorType === 'DF9') {
+                    updateTotalDF9();
+                    autoCalculateDF9();
+                }
+
+                // Initial DF10 update if applicable
+                if (factorType === 'DF10') {
+                    updateTotalDF10();
+                    autoCalculateDF10();
+                }
+            });
+
+            // Reset All Button Event Listener
+            const resetAllBtn = document.getElementById('resetAllBtn');
+            console.log('Reset button element:', resetAllBtn);
+
+            if (resetAllBtn) {
+                console.log('Attaching click event to reset button');
+                resetAllBtn.addEventListener('click', function () {
+                    console.log('Reset button clicked!');
+                    Swal.fire({
+                        title: 'Reset Semua Design Factor?',
+                        text: "Seluruh data DF1 hingga DF10 akan dihapus secara permanen!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Reset Semua!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('User confirmed reset');
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '{{ route('design-factors.reset-all') }}';
+
+                            const csrfToken = document.createElement('input');
+                            csrfToken.type = 'hidden';
+                            csrfToken.name = '_token';
+                            csrfToken.value = '{{ csrf_token() }}';
+                            form.appendChild(csrfToken);
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        } else {
+                            console.log('User cancelled reset');
+                        }
+                    });
+                });
+            } else {
+                console.error('Reset button not found! Button might be hidden or not rendered.');
+            }
+        </script>
     @endpush
 </x-app-layout>

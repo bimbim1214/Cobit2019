@@ -174,6 +174,90 @@ class DesignFactorController extends Controller
             return view('design-factors.index', compact('df8', 'results', 'factorInfo', 'progress', 'type', 'designFactor', 'avgImp', 'weight', 'metadata', 'df4Mapping', 'df5', 'df7Mapping', 'df8Mapping', 'df9Mapping', 'df10Mapping'));
         }
 
+        // Specific handling for DF9
+        if ($type === 'DF9') {
+            // Get DF9 mapping data
+            $df9MapData = \App\Models\Df9Map::orderBy('objective_code')->get();
+
+            // Get existing or create new DF9 (MOVED UP)
+            $designFactor = DesignFactor::where('user_id', $user->id)
+                ->where('factor_type', 'DF9')
+                ->first();
+
+            if (!$designFactor) {
+                $designFactor = new DesignFactor(['factor_type' => 'DF9']);
+                $designFactor->inputs = DesignFactor::getDefaultInputs('DF9');
+            }
+            $designFactor->factor_type = 'DF9';
+
+            // Get inputs for calculation
+            $inputs = $designFactor->inputs ?? DesignFactor::getDefaultInputs('DF9');
+            $importanceAgile = floatval($inputs['agile']['importance'] ?? 15.00);
+            $importanceDevops = floatval($inputs['devops']['importance'] ?? 10.00);
+            $importanceTraditional = floatval($inputs['traditional']['importance'] ?? 75.00);
+
+            // Fixed weights for Baseline Score calculation
+            $baselineAgile = 15.00;
+            $baselineDevops = 10.00;
+            $baselineTraditional = 75.00;
+
+            // Calculate scores using MMULT formula
+            $scores = [];
+            $baselineScores = [];
+            $relativeImportance = [];
+
+            foreach ($df9MapData as $map) {
+                $code = $map->objective_code;
+
+                // MMULT calculation: Score = (Agile * Agile%) + (DevOps * DevOps%) + (Traditional * Traditional%)
+                $score = ($map->agile * $importanceAgile / 100) +
+                    ($map->devops * $importanceDevops / 100) +
+                    ($map->traditional * $importanceTraditional / 100);
+
+                // Baseline Score Calculation: (Agile% * 15) + (DevOps% * 10) + (Traditional% * 75)
+                $baselineScore = ($map->agile * $baselineAgile / 100) +
+                    ($map->devops * $baselineDevops / 100) +
+                    ($map->traditional * $baselineTraditional / 100);
+
+                $scores[$code] = $score;
+                $baselineScores[$code] = $baselineScore;
+
+                // Calculate relative importance
+                $calculated = ($baselineScore > 0) ? (100 * $score) / $baselineScore : 0;
+                $relativeImportance[$code] = (round($calculated / 5) * 5) - 100;
+            }
+
+            $results = [];
+            foreach ($df9MapData as $map) {
+                $code = $map->objective_code;
+                $results[] = [
+                    'code' => $code,
+                    'name' => $map->objective_name,
+                    'score' => $scores[$code] ?? 0,
+                    'baseline_score' => $baselineScores[$code] ?? 0,
+                    'relative_importance' => $relativeImportance[$code] ?? 0,
+                ];
+            }
+
+            $factorInfo = DesignFactor::getFactorInfo('DF9');
+            $progress = DesignFactor::getProgress($user->id);
+
+            // Inputs already loaded above
+
+            $avgImp = 0; // Not used for MMULT display but required variable
+            $weight = 0; // Not used for MMULT display
+            $metadata = DesignFactor::getMetadata('DF9');
+            $df4Mapping = [];
+            $df5 = null;
+            $df6 = null;
+            $df7Mapping = [];
+            $df8Mapping = [];
+            $df9Mapping = \App\Models\DesignFactor::getDF9Mapping();
+            $df10Mapping = [];
+
+            return view('design-factors.index', compact('results', 'factorInfo', 'progress', 'type', 'designFactor', 'avgImp', 'weight', 'metadata', 'df4Mapping', 'df5', 'df6', 'df7Mapping', 'df8Mapping', 'df9Mapping', 'df10Mapping'));
+        }
+
         // Get or create specific factor type for current user
         $designFactor = DesignFactor::where('user_id', $user->id)
             ->where('factor_type', $type)
@@ -773,7 +857,15 @@ class DesignFactorController extends Controller
                 ($map['devops'] * $importanceDevops / 100) +
                 ($map['traditional'] * $importanceTraditional / 100);
 
-            $baselineScore = $itemDict[$code]['baseline_score'] ?? 1.00;
+            // Baseline Calculation: (Agile% * 15) + (DevOps% * 10) + (Traditional% * 75)
+            // Note: DB columns are 'agile', 'devops', 'traditional' (percentage values from mapping)
+            $baselineAgile = 15;
+            $baselineDevops = 10;
+            $baselineTraditional = 75;
+
+            $baselineScore = ($map['agile'] * $baselineAgile / 100) +
+                ($map['devops'] * $baselineDevops / 100) +
+                ($map['traditional'] * $baselineTraditional / 100);
 
             $results[] = [
                 'code' => $code,

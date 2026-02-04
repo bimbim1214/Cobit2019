@@ -587,48 +587,18 @@ class DesignFactor extends Model
      */
     public static function getDF9Mapping(): array
     {
-        return [
-            'EDM01' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'EDM02' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'EDM03' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'EDM04' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'EDM05' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO01' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO02' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO03' => ['agile' => 1.0, 'devops' => 2.0, 'traditional' => 1.0],
-            'APO04' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO05' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO06' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO07' => ['agile' => 1.0, 'devops' => 1.5, 'traditional' => 1.0],
-            'APO08' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO09' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO10' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO11' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO12' => ['agile' => 1.0, 'devops' => 1.5, 'traditional' => 1.0],
-            'APO13' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'APO14' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'BAI01' => ['agile' => 2.0, 'devops' => 1.5, 'traditional' => 1.0],
-            'BAI02' => ['agile' => 3.5, 'devops' => 2.0, 'traditional' => 1.0],
-            'BAI03' => ['agile' => 4.0, 'devops' => 3.0, 'traditional' => 1.0],
-            'BAI04' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'BAI05' => ['agile' => 2.5, 'devops' => 1.5, 'traditional' => 1.0],
-            'BAI06' => ['agile' => 3.5, 'devops' => 2.0, 'traditional' => 1.0],
-            'BAI07' => ['agile' => 2.5, 'devops' => 2.5, 'traditional' => 1.0],
-            'BAI08' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'BAI09' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'BAI10' => ['agile' => 1.5, 'devops' => 2.0, 'traditional' => 1.0],
-            'BAI11' => ['agile' => 2.5, 'devops' => 1.5, 'traditional' => 1.0],
-            'DSS01' => ['agile' => 1.0, 'devops' => 2.5, 'traditional' => 1.0],
-            'DSS02' => ['agile' => 1.0, 'devops' => 1.5, 'traditional' => 1.0],
-            'DSS03' => ['agile' => 1.0, 'devops' => 1.5, 'traditional' => 1.0],
-            'DSS04' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'DSS05' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'DSS06' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'MEA01' => ['agile' => 1.5, 'devops' => 1.5, 'traditional' => 1.0],
-            'MEA02' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'MEA03' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-            'MEA04' => ['agile' => 1.0, 'devops' => 1.0, 'traditional' => 1.0],
-        ];
+        $df9Maps = \App\Models\Df9Map::all();
+        $mapping = [];
+
+        foreach ($df9Maps as $map) {
+            $mapping[$map->objective_code] = [
+                'agile' => (float) $map->agile,
+                'devops' => (float) $map->devops,
+                'traditional' => (float) $map->traditional,
+            ];
+        }
+
+        return $mapping;
     }
 
     /**
