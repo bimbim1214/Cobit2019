@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 
 class DesignFactorController extends Controller
 {
+
+
     /**
      * Display the design factor calculator page.
      */
@@ -541,8 +543,65 @@ class DesignFactorController extends Controller
             ]
         );
 
-        // Update items if provided (though usually read-only for DF2)
-        if (isset($validated['items'])) {
+        // Update items if provided
+        if ($type === 'DF4' && isset($validated['inputs'])) {
+            // FORCE RE-CALCULATION FOR DF4 SERVER-SIDE
+            // This ensures we use the correct mapping and logic regardless of what frontend sends
+            $calculatedResults = DesignFactor::calculateDf4Results($validated['inputs']);
+            $designFactor->items()->delete();
+
+            // Note: calculateDf4Results returns [Code => RelImp]
+            // We need to fetch Mapping and Baseline to populate score/baseline columns correctly in DB
+            $df4Mapping = DesignFactor::getDF4Mapping();
+            $df4Baselines = DesignFactor::getDf4BaselineScores();
+
+            // Re-calculate Score locally here for saving purposes (or update calculateDf4Results to return full objects)
+            // A simpler way: Iterate the results and reconstruct the item data
+
+            // Better approach: Let's reuse the logic from calculateDf4Results but here, or trust the return
+            // Currently calculateDf4Results returns [Code => RelImp]. 
+            // We need 'score' and 'baseline_score' for the DB items table.
+
+            // Let's quickly reconstruct the loop to get full data for saving 
+            // (Ideally calculateDf4Results should return full structure, but for now we inline or update helper)
+
+            // RE-IMPLEMENTING SAVING LOOP to get all fields:
+            $inputs = $validated['inputs'];
+            $inputValues = [];
+            foreach ($inputs as $k => $v) {
+                // normalize input keys
+                $val = (float) ($v['importance'] ?? 1);
+                // Handle it01 vs IT01 if needed, but validated inputs usually come as keyed by view
+                // View sends inputs[it01]..
+                $inputValues[strtolower($k)] = $val;
+            }
+
+            foreach ($df4Baselines as $code => $baselineVal) {
+                // Calculate Score
+                $mapRow = $df4Mapping[$code] ?? [];
+                $score = 0;
+                // Assuming mapRow keys match input keys (it01...)
+                for ($i = 1; $i <= 20; $i++) {
+                    $k = sprintf('it%02d', $i);
+                    $mapVal = $mapRow[$k] ?? 1.0; // Default 1.0 if missing
+                    // Find input value. View sends keys like 'it01' or 'IT01'? 
+                    // Based on blade, keys are it01..it20 from user inputs
+                    $inVal = $inputValues[$k] ?? 1.0;
+                    $score += $mapVal * $inVal;
+                }
+
+                $relImp = $calculatedResults[$code] ?? 0;
+
+                $designFactor->items()->create([
+                    'code' => $code,
+                    'score' => $score,
+                    'baseline_score' => $baselineVal, // Use the Hardcoded Baseline
+                    'relative_importance' => $relImp
+                ]);
+            }
+
+        } elseif (isset($validated['items'])) {
+            // GENERIC HANDLING FOR OTHER DFs (DF1, DF2, DF3, DF7...)
             $designFactor->items()->delete();
             foreach ($validated['items'] as $itemData) {
                 $designFactor->items()->create([
@@ -570,13 +629,70 @@ class DesignFactorController extends Controller
         $inputs = $request->input('inputs', []);
         $itemsData = $request->input('items', []);
 
+        // DF4 Specific Handling
+        if ($type === 'DF4') {
+            // Calculate using the static helper that has the correct logic & hardcoded baselines
+            $calculatedResults = DesignFactor::calculateDf4Results($inputs);
+            $df4Mapping = DesignFactor::getDF4Mapping();
+            $df4Baselines = DesignFactor::getDf4BaselineScores();
+
+            // Normalize input keys for score calculation locally if needed,
+            // or trust calculateDf4Results if we want just the final value.
+            // But frontend expects 'score', 'baseline_score', 'relative_importance'.
+
+            // Prepare inputs array for score calc
+            $inputValues = [];
+            $totalInput = 0;
+            $count = 0;
+            foreach ($inputs as $k => $v) {
+                $val = (float) ($v['importance'] ?? 1);
+                $inputValues[strtolower($k)] = $val;
+                $totalInput += $val;
+                $count++;
+            }
+
+            $avgImp = $count > 0 ? $totalInput / $count : 1;
+            $weight = ($avgImp > 0) ? (2.0 / $avgImp) : 1.0;
+
+            $items = [];
+            // We must iterate through ALL 40 objectives to return complete result set, 
+            // even if frontend only sent partial items (though it usually sends all).
+            foreach ($df4Baselines as $code => $baselineVal) {
+                // Calculate Score
+                $mapRow = $df4Mapping[$code] ?? [];
+                $score = 0;
+                for ($i = 1; $i <= 20; $i++) {
+                    $k = sprintf('it%02d', $i);
+                    $mapVal = $mapRow[$k] ?? 1.0;
+                    $inVal = $inputValues[$k] ?? 1.0;
+                    $score += $mapVal * $inVal;
+                }
+
+                $relImp = $calculatedResults[$code] ?? 0;
+
+                $items[] = [
+                    'code' => $code,
+                    'score' => round($score, 2),
+                    'baseline_score' => round($baselineVal, 2),
+                    'relative_importance' => $relImp
+                ];
+            }
+
+            return response()->json([
+                'avgImp' => round($avgImp, 2),
+                'weight' => round($weight, 6),
+                'items' => $items,
+            ]);
+        }
+
+        // Generic Handling for DF1, DF2, DF3, DF7...
         // Create a temporary instance for calculation or use request data
         $tempDf = new DesignFactor();
         $tempDf->factor_type = $type;
         $tempDf->inputs = $inputs;
 
         $avgImp = $tempDf->getAverageImportance();
-        $avgBase = $tempDf->getAverageBaseline();
+        // $avgBase not really used in response but kept for compatibility logic if needed
         $weight = $tempDf->getWeightedFactor();
 
         $items = [];
@@ -614,6 +730,9 @@ class DesignFactorController extends Controller
     /**
      * Display summary of all Design Factors
      */
+    /**
+     * Show the summary of all design factors (Canvas).
+     */
     public function summary()
     {
         $user = Auth::user();
@@ -624,52 +743,16 @@ class DesignFactorController extends Controller
                 ->with('error', 'Anda harus menyelesaikan DF1-DF4 terlebih dahulu.');
         }
 
-        // Fetch DFs (DF1-DF4 for Step 2 Initial Scope)
-        $dfs = [];
-        $dfTypes = ['DF1', 'DF2', 'DF3', 'DF4'];
-        foreach ($dfTypes as $t) {
-            $df = DesignFactor::where('user_id', $user->id)->where('factor_type', $t)->first();
-            if ($df) {
-                $df->load('items');
-                $dfs[$t] = $df->items->keyBy('code');
-            }
-        }
+        $results = DesignFactor::getAllFactorResults($user->id);
+        $labels = array_keys($results);
+        $data = array_values($results);
 
-        // Progress info
         $progress = DesignFactor::getProgress($user->id);
 
-        // Prepare Summary Data
-        $summaryData = [];
-        $defaultItems = DesignFactor::getDefaultCobitItems('DF1');
-
-        foreach ($defaultItems as $defaultItem) {
-            $code = $defaultItem['code'];
-
-            // Get objective name
-            $name = $this->getObjectiveName($code);
-
-            $vals = [];
-            $initialScope = 0;
-
-            // Sum up ONLY DF1-DF4 for Step 2
-            foreach (['DF1', 'DF2', 'DF3', 'DF4'] as $t) {
-                $val = 0;
-                if (isset($dfs[$t][$code])) {
-                    $val = $dfs[$t][$code]->relative_importance;
-                }
-                $vals[strtolower($t)] = $val;
-                $initialScope += $val;
-            }
-
-            $summaryData[] = array_merge([
-                'code' => $code,
-                'name' => $name,
-                'initial_scope' => $initialScope,
-            ], $vals);
-        }
-
-        return view('design-factors.summary', compact('summaryData', 'progress'));
+        return view('design-factors.summary', compact('results', 'labels', 'data', 'progress'));
     }
+
+
 
     /**
      * Helper to get objective names

@@ -204,7 +204,7 @@ class DesignFactor extends Model
             } elseif ($type === 'DF4') {
                 $inputs[$key] = [
                     'importance' => 1,
-                    'baseline' => 1
+                    'baseline' => 2
                 ];
             } elseif ($type === 'DF6') {
                 // DF6 uses percentage inputs that must sum to 100%
@@ -475,10 +475,11 @@ class DesignFactor extends Model
 
     /**
      * Get DF4 mapping values
+     * (Logic moved to static helper getDF4Mapping below, keeping this for interface consistency if needed, but the static one is what we use)
      */
-    public static function getDF4Mapping(): array
+    public static function getDF4MappingFromDB(): array
     {
-        return [];
+        return self::getDF4Mapping();
     }
 
     /**
@@ -1113,6 +1114,16 @@ class DesignFactor extends Model
             return $previousDF !== null;
         }
 
+        if ($previousType === 'DF6') {
+            $previousDF = \App\Models\DesignFactor6::where('user_id', $userId)->first();
+            return $previousDF !== null;
+        }
+
+        if ($previousType === 'DF8') {
+            $previousDF = \App\Models\DesignFactor8::where('user_id', $userId)->first();
+            return $previousDF !== null;
+        }
+
         // Check if previous DF is completed
         $previousDF = self::where('user_id', $userId)
             ->where('factor_type', $previousType)
@@ -1135,7 +1146,29 @@ class DesignFactor extends Model
                 $progress[$type] = [
                     'exists' => $df !== null,
                     'completed' => $df !== null,
-                    'locked' => false, // DF5 is never locked by Summary
+                    'locked' => false,
+                    'accessible' => self::canAccess($userId, $type),
+                ];
+                continue;
+            }
+
+            if ($type === 'DF6') {
+                $df = \App\Models\DesignFactor6::where('user_id', $userId)->first();
+                $progress[$type] = [
+                    'exists' => $df !== null,
+                    'completed' => $df !== null,
+                    'locked' => false,
+                    'accessible' => self::canAccess($userId, $type),
+                ];
+                continue;
+            }
+
+            if ($type === 'DF8') {
+                $df = \App\Models\DesignFactor8::where('user_id', $userId)->first();
+                $progress[$type] = [
+                    'exists' => $df !== null,
+                    'completed' => $df !== null,
+                    'locked' => false,
                     'accessible' => self::canAccess($userId, $type),
                 ];
                 continue;
@@ -1167,10 +1200,322 @@ class DesignFactor extends Model
     /**
      * Lock all design factors for a user
      */
-    public static function lockAll(int $userId): void
+    /**
+     * Get DF4 mapping values from database
+     */
+    public static function getDF4Mapping(): array
     {
-        self::where('user_id', $userId)
-            ->update(['is_locked' => true]);
+        $df4Maps = \App\Models\Df4Map::all();
+        $mapping = [];
+
+        foreach ($df4Maps as $map) {
+            $row = [];
+            for ($i = 1; $i <= 20; $i++) {
+                $key = sprintf('it%02d', $i);
+                $row['it' . sprintf('%02d', $i)] = (float) $map->$key;
+            }
+            $mapping[$map->objective_code] = $row;
+        }
+
+        return $mapping;
+    }
+
+    /**
+     * Get DF4 Baseline Scores (Fixed values from COBIT 2019 / User Provided)
+     */
+    public static function getDf4BaselineScores(): array
+    {
+        return [
+            'EDM01' => 70,
+            'EDM02' => 70,
+            'EDM03' => 47,
+            'EDM04' => 67,
+            'EDM05' => 41,
+            'APO01' => 56,
+            'APO02' => 50,
+            'APO03' => 66,
+            'APO04' => 32,
+            'APO05' => 68,
+            'APO06' => 62,
+            'APO07' => 47,
+            'APO08' => 70,
+            'APO09' => 43,
+            'APO10' => 39,
+            'APO11' => 43,
+            'APO12' => 52,
+            'APO13' => 33,
+            'APO14' => 60,
+            'BAI01' => 35,
+            'BAI02' => 51,
+            'BAI03' => 41,
+            'BAI04' => 23,
+            'BAI05' => 28,
+            'BAI06' => 42,
+            'BAI07' => 38,
+            'BAI08' => 31,
+            'BAI09' => 23,
+            'BAI10' => 25,
+            'BAI11' => 45,
+            'DSS01' => 27,
+            'DSS02' => 33,
+            'DSS03' => 32,
+            'DSS04' => 21,
+            'DSS05' => 29,
+            'DSS06' => 29,
+            'MEA01' => 61,
+            'MEA02' => 48,
+            'MEA03' => 59,
+            'MEA04' => 41,
+        ];
+    }
+
+    /**
+     * Calculate DF4 Results (Static Helper)
+     */
+    public static function calculateDf4Results(array $inputs): array
+    {
+        $mapping = self::getDF4Mapping();
+        $baselineScores = self::getDf4BaselineScores();
+        $results = [];
+
+        // Parse inputs to array of values [it01 => val, ...]
+        $inputValues = [];
+        $totalInput = 0;
+        $count = 0;
+        for ($i = 1; $i <= 20; $i++) {
+            $keyUpper = sprintf('IT%02d', $i);  // Try uppercase first (IT01)
+            $keyLower = sprintf('it%02d', $i);  // Try lowercase (it01)
+
+            // Check both uppercase and lowercase keys
+            $val = 1.0; // default
+            if (isset($inputs[$keyUpper])) {
+                $val = (float) ($inputs[$keyUpper]['importance'] ?? 1);
+            } elseif (isset($inputs[$keyLower])) {
+                $val = (float) ($inputs[$keyLower]['importance'] ?? 1);
+            }
+
+            $inputValues[$keyLower] = $val;  // Store as lowercase for consistency
+            $totalInput += $val;
+            $count++;
+        }
+
+        // DEBUG LOGGING
+        \Illuminate\Support\Facades\Log::info('DF4 Calculation Debug:', [
+            'totalInput' => $totalInput,
+            'count' => $count,
+            'avg' => $count > 0 ? $totalInput / $count : 0,
+            'weight_formula' => '2 / avg',
+            'calculated_weight' => ($count > 0 ? $totalInput / $count : 1) > 0 ? (2.0 / ($totalInput / $count)) : 1.0,
+            'inputSample' => array_slice($inputValues, 0, 5)
+        ]);
+
+        // Calculate Weight (J25) = 2 / Average(Importance)
+        $avgImp = $count > 0 ? $totalInput / $count : 1;
+        $weight = ($avgImp > 0) ? (2.0 / $avgImp) : 1.0;
+
+        // Ensure we iterate correctly over all 40 objectives
+        foreach ($baselineScores as $code => $fixedBaseline) {
+            // Get mapping row for this code
+            $mapRow = $mapping[$code] ?? [];
+
+            // Calculate Score (B31) = MMULT(Mapping, Inputs)
+            // If mapRow is empty (no DB data), score is 0 (or fallback logic)
+            $scoreStr = 0;
+            foreach ($mapRow as $itKey => $mapVal) {
+                $inputVal = $inputValues[$itKey] ?? 1.0;
+                $scoreStr += $mapVal * $inputVal;
+            }
+
+            // Calculate Relative Importance
+            // Formula: MROUND((Weight * 100 * Score / BaselineScore), 5) - 100
+            // Use fixedBaseline from the hardcoded array (The "Brown" column)
+            if ($fixedBaseline == 0) {
+                $relImp = 0;
+            } else {
+                $calc = ($weight * 100 * $scoreStr) / $fixedBaseline;
+                $relImp = round($calc / 5) * 5 - 100;
+            }
+
+            // Log for EDM01
+            if ($code === 'EDM01') {
+                \Illuminate\Support\Facades\Log::info('DF4 EDM01 Debug:', [
+                    'weight' => $weight,
+                    'score' => $scoreStr,
+                    'baseline' => $fixedBaseline,
+                    'calc_raw' => isset($calc) ? $calc : 'N/A',
+                    'relImp' => $relImp,
+                    'formula' => "($weight * 100 * $scoreStr) / $fixedBaseline = " . (($weight * 100 * $scoreStr) / $fixedBaseline)
+                ]);
+            }
+
+            $results[$code] = $relImp;
+        }
+        return $results;
+    }
+
+    /**
+     * Calculate DF9 Results (Static Helper)
+     */
+    public static function calculateDf9Results(array $inputs): array
+    {
+        $mapping = self::getDF9Mapping();
+        $results = [];
+
+        $impAgile = $inputs['agile']['importance'] ?? 33.33;
+        $impDevops = $inputs['devops']['importance'] ?? 33.33;
+        $impTraditional = $inputs['traditional']['importance'] ?? 33.34;
+
+        foreach ($mapping as $code => $map) {
+            $score = ($map['agile'] * $impAgile / 100) +
+                ($map['devops'] * $impDevops / 100) +
+                ($map['traditional'] * $impTraditional / 100);
+
+            // Fixed Baseline Weights
+            $baselineScore = ($map['agile'] * 15 / 100) +
+                ($map['devops'] * 10 / 100) +
+                ($map['traditional'] * 75 / 100);
+
+            if ($baselineScore == 0) {
+                $relImp = 0;
+            } else {
+                $calc = (100 * $score) / $baselineScore;
+                $relImp = round($calc / 5) * 5 - 100;
+            }
+
+            $results[$code] = $relImp;
+        }
+        return $results;
+    }
+
+    /**
+     * Calculate DF10 Results (Static Helper)
+     */
+    public static function calculateDf10Results(array $inputs): array
+    {
+        $mapping = self::getDF10Mapping();
+        $results = [];
+
+        $impFM = $inputs['first_mover']['importance'] ?? 75;
+        $impF = $inputs['follower']['importance'] ?? 15;
+        $impSA = $inputs['slow_adopter']['importance'] ?? 10;
+
+        foreach ($mapping as $code => $map) {
+            $score = ($map['first_mover'] * $impFM / 100) +
+                ($map['follower'] * $impF / 100) +
+                ($map['slow_adopter'] * $impSA / 100);
+
+            // Fixed Baseline Weights (15/70/15)
+            $baselineScore = ($map['first_mover'] * 15 / 100) +
+                ($map['follower'] * 70 / 100) +
+                ($map['slow_adopter'] * 15 / 100);
+
+            if ($baselineScore == 0) {
+                $relImp = 0;
+            } else {
+                $calc = (100 * $score) / $baselineScore;
+                $relImp = round($calc / 5) * 5 - 100;
+            }
+
+            $results[$code] = $relImp;
+        }
+        return $results;
+    }
+
+    /**
+     * Aggregates results from all Design Factors for a user.
+     * Returns an array of ['objective_code' => normalized_score] (or detailed breakdown).
+     */
+    public static function getAllFactorResults(int $userId): array
+    {
+        $aggregated = [];
+        // Initialize aggregation with 0
+        // We need a list of all objective codes. We can get it from DF1 defaults.
+        $codes = collect(self::getDefaultCobitItems('DF1'))->pluck('code')->toArray();
+        foreach ($codes as $code) {
+            $aggregated[$code] = 0;
+        }
+
+        // --- Generic DFs (1, 2, 3, 7) ---
+        // Assuming they store calculated results in design_factor_items
+        $genericTypes = ['DF1', 'DF2', 'DF3', 'DF7'];
+        foreach ($genericTypes as $type) {
+            $df = self::where('user_id', $userId)->where('factor_type', $type)->first();
+            if ($df) {
+                // Check if items are persisted
+                $itemCount = $df->items()->count();
+                if ($itemCount > 0) {
+                    $items = $df->items;
+                    foreach ($items as $item) {
+                        if (isset($aggregated[$item->code])) {
+                            $aggregated[$item->code] += $item->relative_importance;
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- Specialized DFs (4, 5, 6, 8, 9, 10) ---
+
+        // DF4: Use dynamic calculation with mapping
+        $df4 = self::where('user_id', $userId)->where('factor_type', 'DF4')->first();
+        if ($df4) {
+            $res = self::calculateDf4Results($df4->inputs ?? []);
+            foreach ($res as $code => $val) {
+                if (isset($aggregated[$code]))
+                    $aggregated[$code] += $val;
+            }
+        }
+
+        // --- Specialized DFs (5, 6, 8) ---
+        // DF5
+        $df5 = DesignFactor5::where('user_id', $userId)->first();
+        if ($df5) {
+            $res = $df5->calculateRelativeImportance(); // returns [code => val]
+            foreach ($res as $code => $val) {
+                if (isset($aggregated[$code]))
+                    $aggregated[$code] += $val;
+            }
+        }
+        // DF6
+        $df6 = DesignFactor6::where('user_id', $userId)->first();
+        if ($df6) {
+            $res = $df6->calculateRelativeImportance();
+            foreach ($res as $code => $val) {
+                if (isset($aggregated[$code]))
+                    $aggregated[$code] += $val;
+            }
+        }
+        // DF8
+        $df8 = DesignFactor8::where('user_id', $userId)->first();
+        if ($df8) {
+            $res = $df8->calculateRelativeImportance();
+            foreach ($res as $code => $val) {
+                if (isset($aggregated[$code]))
+                    $aggregated[$code] += $val;
+            }
+        }
+
+        // --- Controller-Managed DFs (9, 10) ---
+        // DF9
+        $df9 = self::where('user_id', $userId)->where('factor_type', 'DF9')->first();
+        if ($df9 && $df9->inputs) {
+            $res = self::calculateDf9Results($df9->inputs);
+            foreach ($res as $code => $val) {
+                if (isset($aggregated[$code]))
+                    $aggregated[$code] += $val;
+            }
+        }
+        // DF10
+        $df10 = self::where('user_id', $userId)->where('factor_type', 'DF10')->first();
+        if ($df10 && $df10->inputs) {
+            $res = self::calculateDf10Results($df10->inputs);
+            foreach ($res as $code => $val) {
+                if (isset($aggregated[$code]))
+                    $aggregated[$code] += $val;
+            }
+        }
+
+        return $aggregated;
     }
 }
 
