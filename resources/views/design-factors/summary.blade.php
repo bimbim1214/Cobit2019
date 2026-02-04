@@ -123,16 +123,17 @@
 
             <!-- Progress Bar -->
             @php
-                // Progress based on DF1-DF4 only (Summary doesn't include DF5)
+                // Progress based on all 10 DFs
                 $completedCount = 0;
-                foreach (['DF1', 'DF2', 'DF3', 'DF4'] as $df) {
+                $allDfs = ['DF1', 'DF2', 'DF3', 'DF4', 'DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10'];
+                foreach ($allDfs as $df) {
                     if (isset($progress[$df]) && $progress[$df]['completed']) {
                         $completedCount++;
                     }
                 }
-                // If Summary is locked, show 100%
-                $allLocked = isset($progress['Summary']) && $progress['Summary']['locked'];
-                $progressPercent = $allLocked ? 100 : (($completedCount / 4) * 100);
+                // If Summary is locked, we can assume DF1-DF4 is done.
+                // But for progress bar, let's just count total completed.
+                $progressPercent = ($completedCount / 10) * 100;
             @endphp
             <div class="mb-6 bg-white rounded-xl shadow-sm p-4">
                 <div class="flex justify-between items-center mb-2">
@@ -148,49 +149,63 @@
             <!-- Design Factor Tabs -->
             <div class="flex flex-wrap justify-center gap-2 mb-8">
                 @php
-                    $tabs = [
-                        'DF1' => 'DF1: Enterprise Strategy',
-                        'DF2' => 'DF2: Enterprise Goals',
-                        'DF3' => 'DF3: Risk Profile',
-                        'DF4' => 'DF4: IT-Related Issues',
+                    $allTabs = [
+                        'DF1' => 'DF1',
+                        'DF2' => 'DF2',
+                        'DF3' => 'DF3',
+                        'DF4' => 'DF4',
                     ];
                 @endphp
 
-                @foreach($tabs as $tabType => $tabLabel)
+                @foreach($allTabs as $tabType => $tabLabel)
                     @php
                         $isAccessible = isset($progress[$tabType]) && $progress[$tabType]['accessible'];
                         $isCompleted = isset($progress[$tabType]) && $progress[$tabType]['completed'];
                     @endphp
                     <a href="{{ $isAccessible ? route('design-factors.index', $tabType) : '#' }}"
-                        class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2
-                                                                        {{ $isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}"
+                        class="px-5 py-2 text-xs font-bold rounded-full transition-all inline-flex items-center gap-1
+                            {{ $isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200 shadow-sm border border-gray-100' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}"
                         {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
                         {{ $tabLabel }}
                         @if($isCompleted)
-                            <span class="text-lg">✅</span>
+                            <span class="text-xs">✅</span>
                         @endif
                     </a>
                 @endforeach
 
                 {{-- Summary Tab (Active) --}}
                 <a href="{{ route('design-factors.summary') }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all bg-green-600 text-white shadow-lg">
+                    class="px-5 py-2 text-xs font-bold rounded-full transition-all bg-green-600 text-white shadow-lg border border-green-700">
                     Summary
                 </a>
 
-                {{-- DF5 Tab --}}
+                {{-- Other DFs --}}
                 @php
-                    $df5Accessible = isset($progress['DF5']) && $progress['DF5']['accessible'];
-                    $df5Completed = isset($progress['DF5']) && $progress['DF5']['completed'];
+                    $otherTabsList = [
+                        'DF5' => 'DF5',
+                        'DF6' => 'DF6',
+                        'DF7' => 'DF7',
+                        'DF8' => 'DF8',
+                        'DF9' => 'DF9',
+                        'DF10' => 'DF10',
+                    ];
                 @endphp
-                <a href="{{ $df5Accessible ? route('design-factors.index', 'DF5') : '#' }}"
-                    class="px-6 py-2 text-sm font-bold rounded-full transition-all inline-flex items-center gap-2 
-                    {{ $df5Accessible ? 'bg-white text-gray-600 hover:bg-gray-200' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}" {{ !$df5Accessible ? 'onclick="return false;"' : '' }}>
-                    DF5: Governance Objectives
-                    @if($df5Completed)
-                        <span class="text-lg">✅</span>
-                    @endif
-                </a>
+
+                @foreach($otherTabsList as $tabType => $tabLabel)
+                    @php
+                        $isAccessible = isset($progress[$tabType]) && $progress[$tabType]['accessible'];
+                        $isCompleted = isset($progress[$tabType]) && $progress[$tabType]['completed'];
+                        $route = ($tabType === 'DF5') ? route('design-factors.index', 'DF5') : route('design-factors.index', $tabType);
+                    @endphp
+                    <a href="{{ $isAccessible ? $route : '#' }}"
+                        class="px-5 py-2 text-xs font-bold rounded-full transition-all inline-flex items-center gap-1 
+                        {{ $isAccessible ? 'bg-white text-gray-600 hover:bg-gray-200 shadow-sm border border-gray-100' : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60' }}" {{ !$isAccessible ? 'onclick="return false;"' : '' }}>
+                        {{ $tabLabel }}
+                        @if($isCompleted)
+                            <span class="text-xs">✅</span>
+                        @endif
+                    </a>
+                @endforeach
             </div>
 
             <!-- Summary Chart -->
@@ -219,12 +234,11 @@
                         <thead>
                             <tr>
                                 <th style="min-width: 400px;">Design Factors</th>
-                                <th style="min-width: 120px;">Enterprise<br>Strategy</th>
-                                <th style="min-width: 120px;">Enterprise<br>Goals</th>
-                                <th style="min-width: 120px;">Risk Profile</th>
-                                <th style="min-width: 120px;">IT-Related Issues</th>
-                                <th style="min-width: 150px;">Initial Scope:<br>Governance/<br>Management<br>Objectives
-                                    Score</th>
+                                <th>DF1</th>
+                                <th>DF2</th>
+                                <th>DF3</th>
+                                <th>DF4</th>
+                                <th style="min-width: 150px;">Initial Scope Score</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -232,49 +246,30 @@
                                 <tr>
                                     <td>
                                         <span class="px-3 py-1 text-sm font-black rounded
-                                                                                                @if(str_starts_with($row['code'], 'EDM')) badge-edm
-                                                                                                @elseif(str_starts_with($row['code'], 'APO')) badge-apo
-                                                                                                @elseif(str_starts_with($row['code'], 'BAI')) badge-bai
-                                                                                                @elseif(str_starts_with($row['code'], 'DSS')) badge-dss
-                                                                                                @elseif(str_starts_with($row['code'], 'MEA')) badge-mea
-                                                                                                @endif">
+                                                                                                    @if(str_starts_with($row['code'], 'EDM')) badge-edm
+                                                                                                    @elseif(str_starts_with($row['code'], 'APO')) badge-apo
+                                                                                                    @elseif(str_starts_with($row['code'], 'BAI')) badge-bai
+                                                                                                    @elseif(str_starts_with($row['code'], 'DSS')) badge-dss
+                                                                                                    @elseif(str_starts_with($row['code'], 'MEA')) badge-mea
+                                                                                                    @endif">
                                             {{ $row['code'] }}
                                         </span>
                                         <span class="ml-2">{{ $row['name'] }}</span>
                                     </td>
+                                    @foreach(['df1', 'df2', 'df3', 'df4'] as $dfKey)
+                                        <td class="
+                                            @if($row[$dfKey] > 0) value-positive
+                                            @elseif($row[$dfKey] < 0) value-negative
+                                            @else value-neutral
+                                            @endif">
+                                            {{ $row[$dfKey] > 0 ? '+' : '' }}{{ (int) $row[$dfKey] }}
+                                        </td>
+                                    @endforeach
                                     <td class="
-                                                                                            @if($row['df1'] > 0) value-positive
-                                                                                            @elseif($row['df1'] < 0) value-negative
-                                                                                            @else value-neutral
-                                                                                            @endif">
-                                        {{ $row['df1'] > 0 ? '+' : '' }}{{ (int) $row['df1'] }}
-                                    </td>
-                                    <td class="
-                                                                                            @if($row['df2'] > 0) value-positive
-                                                                                            @elseif($row['df2'] < 0) value-negative
-                                                                                            @else value-neutral
-                                                                                            @endif">
-                                        {{ $row['df2'] > 0 ? '+' : '' }}{{ (int) $row['df2'] }}
-                                    </td>
-                                    <td class="
-                                                                                            @if($row['df3'] > 0) value-positive
-                                                                                            @elseif($row['df3'] < 0) value-negative
-                                                                                            @else value-neutral
-                                                                                            @endif">
-                                        {{ $row['df3'] > 0 ? '+' : '' }}{{ (int) $row['df3'] }}
-                                    </td>
-                                    <td class="
-                                                                                            @if($row['df4'] > 0) value-positive
-                                                                                            @elseif($row['df4'] < 0) value-negative
-                                                                                            @else value-neutral
-                                                                                            @endif">
-                                        {{ $row['df4'] > 0 ? '+' : '' }}{{ (int) $row['df4'] }}
-                                    </td>
-                                    <td class="
-                                                                                            @if($row['initial_scope'] > 0) initial-scope-positive
-                                                                                            @elseif($row['initial_scope'] < 0) initial-scope-negative
-                                                                                            @else initial-scope-neutral
-                                                                                            @endif">
+                                        @if($row['initial_scope'] > 0) initial-scope-positive
+                                        @elseif($row['initial_scope'] < 0) initial-scope-negative
+                                        @else initial-scope-neutral
+                                        @endif">
                                         {{ $row['initial_scope'] > 0 ? '+' : '' }}{{ (int) $row['initial_scope'] }}
                                     </td>
                                 </tr>
@@ -288,9 +283,8 @@
             <div class="p-6 bg-blue-50 border border-blue-200 rounded-xl shadow-sm mb-6">
                 <h3 class="text-lg font-bold text-blue-800 mb-2">📊 Summary Information</h3>
                 <p class="text-blue-700">
-                    This summary aggregates the relative importance scores from all four Design Factors (DF1-DF4)
-                    and calculates the <strong>Initial Scope: Governance/Management Objectives Score</strong> for each
-                    COBIT objective.
+                    This summary aggregates the relative importance scores from the first four Design Factors (**DF1-DF4**)
+                    to determine the **Initial Scope** of the Governance System.
                 </p>
                 <p class="text-blue-700 mt-2">
                     <strong>Color Legend:</strong>
@@ -328,7 +322,7 @@
 
             <!-- Lock Summary Button -->
             @php
-                // Check if DF1-DF4 are completed (not including DF5)
+                // Check if DF1-DF4 are completed
                 $allCompleted = true;
                 foreach (['DF1', 'DF2', 'DF3', 'DF4'] as $df) {
                     if (!isset($progress[$df]) || !$progress[$df]['completed']) {
@@ -390,20 +384,20 @@
                                 title: '🔒 Konfirmasi Penguncian',
                                 icon: 'warning',
                                 html: `
-                                        <div style="text-align: left; margin-top: 10px;">
-                                            <p style="color: #4b5563; font-size: 15px; margin-bottom: 15px;">
-                                                Apakah Anda yakin ingin menyimpan Summary dan mengunci <strong>DF1-DF4</strong>?
-                                            </p>
-                                            <div style="background: #fffbe6; border: 1px solid #ffe58f; padding: 12px; border-radius: 8px;">
-                                                <p style="margin: 0; font-weight: 700; color: #856404; font-size: 14px;">⚠️ Perhatian:</p>
-                                                <ul style="margin: 8px 0 0 15px; padding: 0; color: #856404; font-size: 13px; line-height: 1.5;">
-                                                    <li>Data <strong>DF1-DF4</strong> akan terkunci permanen</li>
-                                                    <li>Anda tidak dapat mengubah data ini lagi</li>
-                                                    <li><strong>DF5</strong> akan tetap dapat diakses</li>
-                                                </ul>
+                                            <div style="text-align: left; margin-top: 10px;">
+                                                <p style="color: #4b5563; font-size: 15px; margin-bottom: 15px;">
+                                                    Apakah Anda yakin ingin menyimpan Summary dan mengunci <strong>DF1-DF4</strong>?
+                                                </p>
+                                                <div style="background: #fffbe6; border: 1px solid #ffe58f; padding: 12px; border-radius: 8px;">
+                                                    <p style="margin: 0; font-weight: 700; color: #856404; font-size: 14px;">⚠️ Perhatian:</p>
+                                                    <ul style="margin: 8px 0 0 15px; padding: 0; color: #856404; font-size: 13px; line-height: 1.5;">
+                                                        <li>Data <strong>DF1-DF4</strong> akan terkunci permanen</li>
+                                                        <li>Anda tidak dapat mengubah data ini lagi</li>
+                                                        <li><strong>DF5</strong> akan tetap dapat diakses</li>
+                                                    </ul>
+                                                </div>
                                             </div>
-                                        </div>
-                                    `,
+                                        `,
                                 showCancelButton: true,
                                 confirmButtonColor: '#16a34a',
                                 cancelButtonColor: '#6b7280',

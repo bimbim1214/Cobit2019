@@ -43,6 +43,26 @@ class DesignFactor extends Model
     }
 
     /**
+     * Get title and description for factor type
+     */
+    public static function getFactorInfo(string $type): array
+    {
+        return match ($type) {
+            'DF1' => ['title' => 'Strategic Objectives', 'description' => 'Identify the importance of various strategic objectives.'],
+            'DF2' => ['title' => 'Enterprise Goals', 'description' => 'Evaluate the importance of enterprise goals.'],
+            'DF3' => ['title' => 'Risk Scenario Categories', 'description' => 'Assess the risk profile of the organization.'],
+            'DF4' => ['title' => 'IT-Related Issues', 'description' => 'Identify current IT-related issues.'],
+            'DF5' => ['title' => 'Governance/Management Objectives', 'description' => 'Analyze governance and management objectives.'],
+            'DF6' => ['title' => 'Threat Landscape', 'description' => 'Assess the current threat landscape.'],
+            'DF7' => ['title' => 'Importance of Role of IT', 'description' => 'Define the role and importance of IT.'],
+            'DF8' => ['title' => 'Sourcing Model', 'description' => 'Evaluate the importance of verschiedene sourcing models.'],
+            'DF9' => ['title' => 'IT Implementation', 'description' => 'Assess the importance of IT implementation methods.'],
+            'DF10' => ['title' => 'Tech Adoption', 'description' => 'Determine the technology adoption strategy.'],
+            default => ['title' => 'Unknown Factor', 'description' => 'Please select a valid design factor.'],
+        };
+    }
+
+    /**
      * Get metadata for input items based on factor type
      */
     public static function getMetadata(string $type): array
@@ -184,7 +204,7 @@ class DesignFactor extends Model
             } elseif ($type === 'DF4') {
                 $inputs[$key] = [
                     'importance' => 1,
-                    'baseline' => 2
+                    'baseline' => 1
                 ];
             } elseif ($type === 'DF6') {
                 // DF6 uses percentage inputs that must sum to 100%
@@ -321,21 +341,9 @@ class DesignFactor extends Model
         if ($avgImp == 0 || $avgBase == 0)
             return 1.0;
 
-        // DF1, DF4, and DF7: Baseline / Importance
-        if ($this->factor_type === 'DF1' || $this->factor_type === 'DF4' || $this->factor_type === 'DF7') {
-            return $avgBase / $avgImp;
-        }
-
-        // DF2: Baseline / Importance
-        // Formula: F22 = AVERAGE(F6:F18) / F20
-        // where F6:F18 are baseline values (all 3) and F20 = AVERAGE(E6:E18) = average importance
-        // F22 = 3 / AVERAGE(importance) = Baseline / Importance
-        if ($this->factor_type === 'DF2') {
-            return $avgBase / $avgImp;
-        }
-
-        // DF3: Importance / Baseline
-        if ($this->factor_type === 'DF3') {
+        // DF1, DF2, DF3, DF4, and DF7: Importance / Baseline
+        // Standard COBIT 2019 scaling: Higher importance = Higher mapping score
+        if (in_array($this->factor_type, ['DF1', 'DF2', 'DF3', 'DF4', 'DF7'])) {
             return $avgImp / $avgBase;
         }
 
@@ -463,6 +471,14 @@ class DesignFactor extends Model
             'MEA03' => ['high' => 4.0, 'normal' => 2.0, 'low' => 1.0],
             'MEA04' => ['high' => 3.5, 'normal' => 2.0, 'low' => 1.0],
         ];
+    }
+
+    /**
+     * Get DF4 mapping values
+     */
+    public static function getDF4Mapping(): array
+    {
+        return [];
     }
 
     /**
@@ -805,46 +821,46 @@ class DesignFactor extends Model
 
         if ($type === 'DF4') {
             return [
-                ['code' => 'EDM01', 'score' => 59.5, 'baseline_score' => 70],
-                ['code' => 'EDM02', 'score' => 61, 'baseline_score' => 70],
-                ['code' => 'EDM03', 'score' => 39, 'baseline_score' => 47],
-                ['code' => 'EDM04', 'score' => 65.5, 'baseline_score' => 67],
-                ['code' => 'EDM05', 'score' => 33, 'baseline_score' => 41],
-                ['code' => 'APO01', 'score' => 50, 'baseline_score' => 56],
-                ['code' => 'APO02', 'score' => 48, 'baseline_score' => 50],
-                ['code' => 'APO03', 'score' => 64.5, 'baseline_score' => 66],
-                ['code' => 'APO04', 'score' => 35.5, 'baseline_score' => 32],
-                ['code' => 'APO05', 'score' => 61, 'baseline_score' => 68],
-                ['code' => 'APO06', 'score' => 52, 'baseline_score' => 62],
-                ['code' => 'APO07', 'score' => 49, 'baseline_score' => 47],
-                ['code' => 'APO08', 'score' => 67.5, 'baseline_score' => 70],
-                ['code' => 'APO09', 'score' => 36.5, 'baseline_score' => 43],
-                ['code' => 'APO10', 'score' => 33, 'baseline_score' => 39],
-                ['code' => 'APO11', 'score' => 34, 'baseline_score' => 43],
-                ['code' => 'APO12', 'score' => 44.5, 'baseline_score' => 52],
-                ['code' => 'APO13', 'score' => 26.5, 'baseline_score' => 33],
-                ['code' => 'APO14', 'score' => 48.5, 'baseline_score' => 60],
-                ['code' => 'BAI01', 'score' => 37.5, 'baseline_score' => 35],
-                ['code' => 'BAI02', 'score' => 47, 'baseline_score' => 51],
-                ['code' => 'BAI03', 'score' => 35, 'baseline_score' => 41],
-                ['code' => 'BAI04', 'score' => 18.5, 'baseline_score' => 23],
-                ['code' => 'BAI05', 'score' => 27.5, 'baseline_score' => 28],
-                ['code' => 'BAI06', 'score' => 38, 'baseline_score' => 42],
-                ['code' => 'BAI07', 'score' => 34, 'baseline_score' => 38],
-                ['code' => 'BAI08', 'score' => 34.5, 'baseline_score' => 31],
-                ['code' => 'BAI09', 'score' => 22, 'baseline_score' => 23],
-                ['code' => 'BAI10', 'score' => 23, 'baseline_score' => 25],
-                ['code' => 'BAI11', 'score' => 46.5, 'baseline_score' => 45],
-                ['code' => 'DSS01', 'score' => 21, 'baseline_score' => 27],
-                ['code' => 'DSS02', 'score' => 24.5, 'baseline_score' => 33],
-                ['code' => 'DSS03', 'score' => 28, 'baseline_score' => 32],
-                ['code' => 'DSS04', 'score' => 16.5, 'baseline_score' => 21],
-                ['code' => 'DSS05', 'score' => 22.5, 'baseline_score' => 29],
-                ['code' => 'DSS06', 'score' => 20, 'baseline_score' => 29],
-                ['code' => 'MEA01', 'score' => 52.5, 'baseline_score' => 61],
-                ['code' => 'MEA02', 'score' => 38, 'baseline_score' => 48],
-                ['code' => 'MEA03', 'score' => 18.5, 'baseline_score' => 29],
-                ['code' => 'MEA04', 'score' => 47, 'baseline_score' => 58],
+                ['code' => 'EDM01', 'score' => 59.5, 'baseline_score' => 35],
+                ['code' => 'EDM02', 'score' => 61, 'baseline_score' => 35],
+                ['code' => 'EDM03', 'score' => 39, 'baseline_score' => 23.5],
+                ['code' => 'EDM04', 'score' => 65.5, 'baseline_score' => 33.5],
+                ['code' => 'EDM05', 'score' => 33, 'baseline_score' => 20.5],
+                ['code' => 'APO01', 'score' => 50, 'baseline_score' => 28],
+                ['code' => 'APO02', 'score' => 48, 'baseline_score' => 25],
+                ['code' => 'APO03', 'score' => 64.5, 'baseline_score' => 33],
+                ['code' => 'APO04', 'score' => 35.5, 'baseline_score' => 16],
+                ['code' => 'APO05', 'score' => 61, 'baseline_score' => 34],
+                ['code' => 'APO06', 'score' => 52, 'baseline_score' => 31],
+                ['code' => 'APO07', 'score' => 49, 'baseline_score' => 23.5],
+                ['code' => 'APO08', 'score' => 67.5, 'baseline_score' => 35],
+                ['code' => 'APO09', 'score' => 36.5, 'baseline_score' => 21.5],
+                ['code' => 'APO10', 'score' => 33, 'baseline_score' => 19.5],
+                ['code' => 'APO11', 'score' => 34, 'baseline_score' => 21.5],
+                ['code' => 'APO12', 'score' => 44.5, 'baseline_score' => 26],
+                ['code' => 'APO13', 'score' => 26.5, 'baseline_score' => 16.5],
+                ['code' => 'APO14', 'score' => 48.5, 'baseline_score' => 30],
+                ['code' => 'BAI01', 'score' => 37.5, 'baseline_score' => 17.5],
+                ['code' => 'BAI02', 'score' => 47, 'baseline_score' => 25.5],
+                ['code' => 'BAI03', 'score' => 35, 'baseline_score' => 20.5],
+                ['code' => 'BAI04', 'score' => 18.5, 'baseline_score' => 11.5],
+                ['code' => 'BAI05', 'score' => 27.5, 'baseline_score' => 14],
+                ['code' => 'BAI06', 'score' => 38, 'baseline_score' => 21],
+                ['code' => 'BAI07', 'score' => 34, 'baseline_score' => 19],
+                ['code' => 'BAI08', 'score' => 34.5, 'baseline_score' => 15.5],
+                ['code' => 'BAI09', 'score' => 22, 'baseline_score' => 11.5],
+                ['code' => 'BAI10', 'score' => 23, 'baseline_score' => 12.5],
+                ['code' => 'BAI11', 'score' => 46.5, 'baseline_score' => 22.5],
+                ['code' => 'DSS01', 'score' => 21, 'baseline_score' => 13.5],
+                ['code' => 'DSS02', 'score' => 24.5, 'baseline_score' => 16.5],
+                ['code' => 'DSS03', 'score' => 28, 'baseline_score' => 16],
+                ['code' => 'DSS04', 'score' => 16.5, 'baseline_score' => 10.5],
+                ['code' => 'DSS05', 'score' => 22.5, 'baseline_score' => 14.5],
+                ['code' => 'DSS06', 'score' => 20, 'baseline_score' => 14.5],
+                ['code' => 'MEA01', 'score' => 52.5, 'baseline_score' => 30.5],
+                ['code' => 'MEA02', 'score' => 38, 'baseline_score' => 24],
+                ['code' => 'MEA03', 'score' => 18.5, 'baseline_score' => 14.5],
+                ['code' => 'MEA04', 'score' => 47, 'baseline_score' => 29],
             ];
         }
 
@@ -1121,7 +1137,7 @@ class DesignFactor extends Model
         }
 
         // Get the previous DF type - NEW ORDER: DF1, DF2, DF3, DF4, Summary, DF5
-        $dfOrder = ['DF1', 'DF2', 'DF3', 'DF4', 'Summary', 'DF5'];
+        $dfOrder = ['DF1', 'DF2', 'DF3', 'DF4', 'Summary', 'DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10'];
         $currentIndex = array_search($type, $dfOrder);
 
         if ($currentIndex === false || $currentIndex === 0) {
@@ -1171,7 +1187,7 @@ class DesignFactor extends Model
     public static function getProgress(int $userId): array
     {
         $progress = [];
-        $types = ['DF1', 'DF2', 'DF3', 'DF4', 'DF5'];
+        $types = ['DF1', 'DF2', 'DF3', 'DF4', 'DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10'];
 
         foreach ($types as $type) {
             if ($type === 'DF5') {

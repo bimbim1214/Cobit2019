@@ -246,12 +246,24 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('design-factors.delete-item');
 
     // DF5 Routes
-    Route::get('/design-factors-df5', [\App\Http\Controllers\DesignFactorController::class, 'showDf5'])
-        ->name('design-factors.df5');
-    Route::post('/design-factors-df5/save', [\App\Http\Controllers\DesignFactorController::class, 'saveDf5'])
-        ->name('design-factors.df5.save');
     Route::post('/design-factors-df5/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculateDf5'])
         ->name('design-factors.df5.calculate');
+
+    // DF6 Routes
+    Route::post('/design-factors-df6/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculateDf6'])
+        ->name('design-factors.df6.calculate');
+
+    // DF8 Routes
+    Route::post('/design-factors-df8/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculateDf8'])
+        ->name('design-factors.df8.calculate');
+
+    // DF9 Routes
+    Route::post('/design-factors-df9/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculateDf9'])
+        ->name('design-factors.df9.calculate');
+
+    // DF10 Routes
+    Route::post('/design-factors-df10/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculateDf10'])
+        ->name('design-factors.df10.calculate');
 });
 
 
