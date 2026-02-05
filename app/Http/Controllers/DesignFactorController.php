@@ -749,7 +749,75 @@ class DesignFactorController extends Controller
 
         $progress = DesignFactor::getProgress($user->id);
 
-        return view('design-factors.summary', compact('results', 'labels', 'data', 'progress'));
+        // Fetch individual DF1-DF4 data for radar charts
+        $df1Data = [];
+        $df2Data = [];
+        $df3Data = [];
+        $df4Data = [];
+
+        // Get DF1 data
+        $df1 = DesignFactor::where('user_id', $user->id)
+            ->where('factor_type', 'DF1')
+            ->with('items')
+            ->first();
+        if ($df1) {
+            foreach ($df1->items as $item) {
+                $df1Data[] = [
+                    'code' => $item->code,
+                    'relative_importance' => $item->relative_importance
+                ];
+            }
+        }
+
+        // Get DF2 data
+        $df2 = DesignFactor::where('user_id', $user->id)
+            ->where('factor_type', 'DF2')
+            ->with('items')
+            ->first();
+        if ($df2) {
+            foreach ($df2->items as $item) {
+                $df2Data[] = [
+                    'code' => $item->code,
+                    'relative_importance' => $item->relative_importance
+                ];
+            }
+        }
+
+        // Get DF3 data
+        $df3 = DesignFactor::where('user_id', $user->id)
+            ->where('factor_type', 'DF3')
+            ->with('items')
+            ->first();
+        if ($df3) {
+            foreach ($df3->items as $item) {
+                $df3Data[] = [
+                    'code' => $item->code,
+                    'relative_importance' => $item->relative_importance
+                ];
+            }
+        }
+
+        // Get DF4 data
+        $df4 = DesignFactor::where('user_id', $user->id)
+            ->where('factor_type', 'DF4')
+            ->with('items')
+            ->first();
+        if ($df4) {
+            foreach ($df4->items as $item) {
+                $df4Data[] = [
+                    'code' => $item->code,
+                    'relative_importance' => $item->relative_importance
+                ];
+            }
+        }
+
+        // Check if DF1-DF4 are already locked
+        $isLocked = DesignFactor::where('user_id', $user->id)
+            ->whereIn('factor_type', ['DF1', 'DF2', 'DF3', 'DF4'])
+            ->where('is_locked', true)
+            ->count() === 4;
+
+        return view('design-factors.summary', compact('results', 'labels', 'data', 'progress', 'df1Data', 'df2Data', 'df3Data', 'df4Data', 'isLocked'));
     }
 
 
